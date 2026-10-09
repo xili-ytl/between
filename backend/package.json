@@ -1,0 +1,36 @@
+{
+  "name": "private-couple-chat-backend",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:function": "esbuild src/function-entry.ts --bundle --platform=node --target=node20 --format=cjs --external:@cloudbase/node-sdk --outfile=functions/chat-api/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "persona:compile": "tsx scripts/compile-wenli-persona.ts",
+    "persona:check": "tsx scripts/compile-wenli-persona.ts --check",
+    "eval:wenli": "tsx scripts/evaluate-wenli-agent.ts",
+    "seed": "tsx scripts/seed.ts",
+    "initialize:profiles": "tsx scripts/initialize-profiles.ts",
+    "backup": "tsx scripts/backup.ts",
+    "restore": "tsx scripts/restore.ts",
+    "verify:backup": "tsx scripts/verify-backup.ts",
+    "smoke:moments": "tsx scripts/smoke-moments.ts",
+    "sign:pet-release": "tsx scripts/sign-pet-release.ts"
+  },
+  "dependencies": {
+    "@cloudbase/node-sdk": "^3.18.3"
+  },
+  "devDependencies": {
+    "@cloudbase/cli": "^3.7.1",
+    "@types/node": "^24.13.3",
+    "esbuild": "^0.25.0",
+    "tsx": "^4.23.7",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
+  }
+}

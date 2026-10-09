@@ -1,0 +1,7 @@
+sdk.dir=C\:\\Users\\your-name\\AppData\\Local\\Android\\Sdk
+CLOUDBASE_FUNCTION_URL=https://your-env-id.api.tcloudbasegateway.com/v1/functions/chat-api
+CLOUDBASE_PUBLISHABLE_KEY=your-client-safe-publishable-key
+
+# Optional client-safe push application key. Never add the master secret here.
+JPUSH_APP_KEY=
+WENLI_TIMING_ENABLED=false

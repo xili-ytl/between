@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.CoupleChat" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@color/entry_surface</item>
+        <item name="android:navigationBarColor">@color/entry_surface</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowBackground">@color/entry_surface</item>
+        <item name="android:windowSplashScreenBackground">@color/entry_surface</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_entry_splash</item>
+    </style>
+</resources>

@@ -1,0 +1,53 @@
+name: Verify source
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+        working-directory: backend
+      - run: npm test
+        working-directory: backend
+      - run: npm run typecheck
+        working-directory: backend
+      - run: npm run persona:check
+        working-directory: backend
+      - run: npm run build:function
+        working-directory: backend
+      - run: node --test android/scripts/wenli-unread.test.mjs
+
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Install matching Android SDK components
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - run: bash ./gradlew testDebugUnitTest lintDebug assembleDebug --no-daemon --console=plain
+        working-directory: android

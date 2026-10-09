@@ -1,0 +1,14 @@
+{
+  "envId": "replace-with-your-cloudbase-env-id",
+  "functionRoot": "./backend/functions",
+  "functions": [
+    {
+      "name": "chat-api",
+      "runtime": "Nodejs20.19",
+      "memorySize": 256,
+      "timeout": 60,
+      "handler": "index.main",
+      "installDependency": true
+    }
+  ]
+}
