@@ -26,6 +26,7 @@ import type {
   AdminStore,
   LoginAttemptRecord,
   LoginAttemptStore,
+  LoginFailurePolicy,
   ContactRemarkStore,
   ImageStorage,
   InitialProfilesFields,
@@ -143,6 +144,22 @@ export class MemoryLoginAttemptStore implements LoginAttemptStore {
 
   async save(accountId: AccountId, source: string, record: LoginAttemptRecord): Promise<void> {
     this.records.set(this.key(accountId, source), structuredClone(record));
+  }
+
+  async recordFailure(accountId: AccountId, source: string, policy: LoginFailurePolicy): Promise<LoginAttemptRecord> {
+    const key = this.key(accountId, source);
+    const current = this.records.get(key);
+    const now = Date.parse(policy.now);
+    if (current?.blockedUntil && Date.parse(current.blockedUntil) > now) return structuredClone(current);
+    const failures = (current?.blockedUntil ? 0 : current?.failures ?? 0) + 1;
+    const record = {
+      failures,
+      blockedUntil: failures >= policy.maxFailures
+        ? new Date(now + policy.blockMilliseconds).toISOString()
+        : null
+    };
+    this.records.set(key, record);
+    return structuredClone(record);
   }
 
   async clear(accountId: AccountId, source: string): Promise<void> {

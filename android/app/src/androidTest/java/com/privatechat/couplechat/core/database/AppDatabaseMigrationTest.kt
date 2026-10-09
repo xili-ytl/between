@@ -23,7 +23,7 @@ class AppDatabaseMigrationTest {
     )
 
     @Test
-    fun migrationFromOneToTwoPreservesMessagesAndAddsTheOrderingIndex() = runTest {
+    fun migrationFromOneToCurrentPreservesMessagesAndAddsTheOrderingIndex() = runTest {
         helper.createDatabase(DATABASE_NAME, 1).apply {
             execSQL(
                 "INSERT INTO messages " +
@@ -36,7 +36,7 @@ class AppDatabaseMigrationTest {
 
         val context = ApplicationProvider.getApplicationContext<Context>()
         val database = Room.databaseBuilder(context, AppDatabase::class.java, DATABASE_NAME)
-            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3)
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4)
             .build()
 
         try {
@@ -54,7 +54,7 @@ class AppDatabaseMigrationTest {
     }
 
     @Test
-    fun migrationFromTwoToThreePreservesMessagesAndBuildsSearchIndex() = runTest {
+    fun migrationFromTwoToCurrentPreservesMessagesAndBuildsSearchIndex() = runTest {
         helper.createDatabase(DATABASE_NAME, 2).apply {
             execSQL(
                 "INSERT INTO messages " +
@@ -67,7 +67,7 @@ class AppDatabaseMigrationTest {
 
         val context = ApplicationProvider.getApplicationContext<Context>()
         val database = Room.databaseBuilder(context, AppDatabase::class.java, DATABASE_NAME)
-            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3)
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4)
             .build()
 
         try {

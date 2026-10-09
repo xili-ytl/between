@@ -3,7 +3,7 @@ import { FIXED_ACCOUNT_IDS } from "../domain/contracts.js";
 import { compareMessageCursors, type AccountId, type MessageCursor } from "../domain/contracts.js";
 import { assertLegacyReadStateForward } from "../domain/read-state.js";
 import type { CloudPersistence, DocumentData } from "./cloudbase-stores.js";
-import type { InitialProfilesFields, StoredDocument, UploadMetadata } from "../ports/stores.js";
+import type { InitialProfilesFields, LoginAttemptRecord, LoginFailurePolicy, StoredDocument, UploadMetadata } from "../ports/stores.js";
 import { cleanDocument, firstDocument, queryDueWenliAgentJobDocuments, readDocument, setDocument, throwResolvedCloudBaseError, type CloudDatabase, type CloudTransaction } from "./cloudbase-sdk-helpers.js";
 
 type CloudCollection = ReturnType<CloudDatabase["collection"]>;
@@ -28,6 +28,31 @@ export class NodeCloudBasePersistence implements CloudPersistence {
 
   async putDocument(collection: string, id: string, data: DocumentData): Promise<void> {
     await setDocument(this.db.collection(collection).doc(id), data);
+  }
+
+  async recordLoginFailure(id: string, policy: LoginFailurePolicy): Promise<LoginAttemptRecord> {
+    // The SDK retries conflicts; a threshold-sized burst needs up to that many retries.
+    return this.db.runTransaction(async (transaction: CloudTransaction) => {
+      const reference = transaction.collection("login_attempts").doc(id);
+      const result = await reference.get();
+      throwResolvedCloudBaseError(result);
+      const latest = cleanDocument(firstDocument(result.data));
+      const now = Date.parse(policy.now);
+      const blockedUntil = latest?.blockedUntil;
+      if (typeof blockedUntil === "string" && Date.parse(blockedUntil) > now) {
+        return { failures: numberValue(latest!.failures), blockedUntil };
+      }
+      const failures = (blockedUntil ? 0 : latest ? numberValue(latest.failures) : 0) + 1;
+      const record: LoginAttemptRecord = {
+        failures,
+        blockedUntil: failures >= policy.maxFailures
+          ? new Date(now + policy.blockMilliseconds).toISOString()
+          : null
+      };
+      const setResult = await reference.set({ ...record });
+      throwResolvedCloudBaseError(setResult);
+      return record;
+    }, policy.maxFailures);
   }
 
   async removeDocument(collection: string, id: string): Promise<void> {

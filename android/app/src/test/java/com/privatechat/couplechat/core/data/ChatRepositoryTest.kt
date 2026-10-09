@@ -44,6 +44,41 @@ import org.junit.Test
 
 class ChatRepositoryTest {
     @Test
+    fun recreatedAppKeepsCachedHistoryWhenInitialSyncIsOffline() = runTest {
+        val cached = entity("1002_cached", "已缓存的合成消息", "1002", "2026-08-06T00:00:00Z")
+        val local = FakeLocalStore(listOf(cached))
+        val cursor = MessageCursor(cached.createdAt, cached.id)
+        val cursors = FakeSyncCursorStore(cursor, historyComplete = true)
+        val repository = ChatRepository(
+            api = FakeApi(beforeFailures = 1), local = local, sessions = chatSessions(),
+            cursorStore = cursors,
+        )
+
+        val result = runCatching { repository.initialSync() }
+
+        assertTrue(result.isFailure)
+        assertEquals(listOf(cached), local.all())
+        assertEquals(listOf(cached.body), repository.messages.first().map { it.body })
+        assertEquals(cursor, cursors.load("1001"))
+        assertTrue(cursors.isHistoryComplete("1001"))
+    }
+
+    @Test
+    fun recreatedAppMergesRecentMessagesWithoutDiscardingOlderCachedHistory() = runTest {
+        val old = entity("1001_old", "旧的合成历史", "1001", "2026-08-01T00:00:00Z")
+        val recent = message("1002_new", "新的合成消息", "1002", "2026-08-06T00:00:00Z")
+        val local = FakeLocalStore(listOf(old))
+        val repository = ChatRepository(
+            api = FakeApi(afterPage = page(recent), beforePages = ArrayDeque(listOf(page(recent)))),
+            local = local, sessions = chatSessions(),
+        )
+
+        repository.initialSync()
+
+        assertEquals(listOf(old.body, recent.body), repository.messages.first().map { it.body })
+    }
+
+    @Test
     fun visibleMessageAdvancesBothUnreadAndPartnerReceiptCursors() = runTest {
         val api = FakeApi()
         val repository = repository(api, FakeLocalStore())
@@ -785,6 +820,8 @@ private class FakeLocalStore(initial: List<MessageEntity> = emptyList()) : Messa
     override fun observeLatest(limit: Int): Flow<List<MessageEntity>> = state.map { rows -> rows.takeLast(limit) }
 
     fun all(): List<MessageEntity> = state.value
+
+    override suspend fun clearAll() { state.value = emptyList() }
 
     override suspend fun insertAll(messages: List<MessageEntity>): Int {
         val oldIds = state.value.mapTo(mutableSetOf()) { it.id }

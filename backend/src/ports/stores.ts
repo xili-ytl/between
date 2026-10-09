@@ -20,6 +20,12 @@ export interface LoginAttemptRecord {
   blockedUntil: string | null;
 }
 
+export interface LoginFailurePolicy {
+  now: string;
+  maxFailures: number;
+  blockMilliseconds: number;
+}
+
 export type InitialProfileFields = Pick<
   UserRecord,
   "displayName" | "gender" | "avatarKey" | "updatedAt"
@@ -53,6 +59,8 @@ export interface UserStore {
 
 export interface LoginAttemptStore {
   get(accountId: AccountId, source: string): Promise<LoginAttemptRecord | null>;
+  /** Read the latest count, reset expired locks, and record a failure in one atomic operation. */
+  recordFailure(accountId: AccountId, source: string, policy: LoginFailurePolicy): Promise<LoginAttemptRecord>;
   save(accountId: AccountId, source: string, record: LoginAttemptRecord): Promise<void>;
   clear(accountId: AccountId, source: string): Promise<void>;
 }

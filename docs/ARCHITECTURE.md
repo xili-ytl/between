@@ -23,7 +23,7 @@ API 真源为 [api-router.ts](../backend/src/api/api-router.ts) 和 [contracts.t
 
 服务层与 CloudBase 事务分别比较位置，旧并发请求不能回退游标。公共回执供另一端显示，旧 unread 字段继续兼容。设备时间不决定顺序，旧会话响应不能污染新账号。
 
-Room 迁移应保留历史，这是设计约束，当前实现尚未完全满足：CacheVersionStore 根据应用版本号触发 ChatRepository.initialSync 清本地缓存，发生在联网同步之前。普通升级后离线首次打开可能失去本地历史可读性；这不等于删除云端消息。首发前需要独立回归与修复。
+普通应用升级不清聊天缓存。数据库结构兼容由 Room 的非破坏迁移负责；ChatRepository.initialSync 合并服务器分页，断网时保留已有历史及接收游标。两项仓库回归验证重建应用后离线保留、联网合并旧缓存；这不是实际 APK 升级或 Room 迁移的设备验收，也不能恢复旧版本已经清掉的缓存。
 
 ## 问理的数据流
 
@@ -50,19 +50,27 @@ flowchart TD
 
 公开搜索按需执行，查询受隐私约束；网页是证据而非指令。正文只显示校验后的 reply，不输出推理、计时或工具封装。来源校验不能替代事实正确性与真实模型评测。
 
-## 首发前的可靠性缺口
+## 已修正的可靠性问题
 
-2026-10-09 源码审查发现，下列项目尚未修复，不能按完成状态介绍：
+2026-10-09 在本地源码候选完成以下修正。测试均使用合成数据，没有连接生产环境。
+
+| 问题 | 修正 | 验证及边界 |
+|---|---|---|
+| 普通升级清本地缓存 | 删除应用版本清缓存机制，[initialSync](../android/app/src/main/java/com/privatechat/couplechat/core/data/ChatRepository.kt) 保留并合并历史 | [仓库回归](../android/app/src/test/java/com/privatechat/couplechat/core/data/ChatRepositoryTest.kt)；迁移测试已编译，实际设备迁移尚未运行 |
+| 每次请求尝试建集合并吞错误 | [function-entry.ts](../backend/src/function-entry.ts) 只路由请求，集合由部署者事先创建 | [入口回归](../backend/test/function-entry.test.ts) 覆盖重复 health/聊天调用与错误传播；新环境必须按部署说明预建集合 |
+| 登录失败计数并发丢失、过期锁重置竞态 | [CloudBase 事务](../backend/src/adapters/cloudbase-persistence.ts) 原子读取最新记录、过期重置与累加；活跃锁不续期，冲突有界重试 | [并发回归](../backend/test/login-attempt-concurrency.test.ts) 与 [安装 SDK 的假传输测试](../backend/test/cloudbase-persistence.test.ts)；尚未在真实 CloudBase 并发验收 |
+
+没有账单或阶段计时，不推算删除集合初始化带来的费用与延迟节省。成功登录清零与并发失败按存储操作顺序生效，没有重写整套认证策略。
+
+## 首发前仍需验证与处理
 
 | 问题 | 当前证据 | 验收要求 |
 |---|---|---|
-| 普通升级清本地缓存 | [CacheVersionStore](../android/app/src/main/java/com/privatechat/couplechat/core/data/CacheVersionStore.kt) 与 [initialSync](../android/app/src/main/java/com/privatechat/couplechat/core/data/ChatRepository.kt) | 升级且离线时仍可查看原缓存，不借用生产数据 |
-| 每次请求尝试建 4 个集合并吞错误 | [function-entry.ts](../backend/src/function-entry.ts) 在 main 中串行执行 ensureCollections | 初始化与业务请求分离，或只复用成功初始化；未知错误可诊断，不忽略失败 |
-| 登录失败计数读改写没有并发保护 | [auth-service.ts](../backend/src/services/auth-service.ts) 与 [cloudbase-stores.ts](../backend/src/adapters/cloudbase-stores.ts) | 并发失败计数不能丢失，锁定规则在共享存储层成立 |
-| 新环境部署步骤不完整 | [部署说明](SETUP.md) 未给出已验收的完整集合/索引配置 | 全新环境初始化后通过隔离双端流程，管理员权限不能传给客户端 |
+| 新环境部署步骤未完整验收 | [部署说明](SETUP.md) 列出准确集合名与管理员权限；完整索引和从零部署尚未实跑 | 全新环境初始化后通过隔离双端流程，管理员权限不能传给客户端 |
 | 默认升级清单引用未随仓库交付的产物 | [release-manifest.ts](../backend/src/release-manifest.ts) 与 [release-service.ts](../backend/src/services/release-service.ts) | 未启用升级应有明确状态；不能因不存在的对象破坏基础体验 |
+| 旧会话分页失败可能修改新会话状态 | [fetchOlderPage](../android/app/src/main/java/com/privatechat/couplechat/core/data/ChatRepository.kt) 的会话失效分支 | 用受控延迟验证旧请求失败不把新会话标记为历史已取完 |
 
-云函数重复建集合会增加请求开销；本轮没有账单或阶段计时，不能据此推算费用与延迟节省。登录 source 的代理头信任边界也需要独立网关核实，尚未证明线上可被伪造。
+登录 source 的代理头信任边界需要独立网关核实，尚未证明线上可被伪造。Room 的历史 schema 与迁移仍需要隔离设备验证。
 
 依赖风险另见 [安全文档](SECURITY.md)。这是聚焦审查，不是全面安全认证。
 

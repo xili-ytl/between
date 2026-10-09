@@ -158,15 +158,13 @@ export class AuthService {
     if (new Date(record.blockedUntil).getTime() > this.now().getTime()) {
       throw new AppError("RATE_LIMITED", "登录尝试过多，请稍后再试");
     }
-    await this.attempts.clear(accountId, source);
   }
 
   private async recordFailure(accountId: AccountId, source: string): Promise<void> {
-    const current = await this.attempts.get(accountId, source);
-    const failures = (current?.failures ?? 0) + 1;
-    const blockedUntil = failures >= MAX_FAILURES
-      ? new Date(this.now().getTime() + BLOCK_MILLISECONDS).toISOString()
-      : null;
-    await this.attempts.save(accountId, source, { failures, blockedUntil });
+    await this.attempts.recordFailure(accountId, source, {
+      now: this.now().toISOString(),
+      maxFailures: MAX_FAILURES,
+      blockMilliseconds: BLOCK_MILLISECONDS
+    });
   }
 }

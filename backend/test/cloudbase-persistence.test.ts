@@ -4,6 +4,148 @@ import { describe, expect, it, vi } from "vitest";
 import { NodeCloudBasePersistence } from "../src/adapters/cloudbase-persistence.js";
 
 describe("NodeCloudBasePersistence", () => {
+  it("rejects fulfilled SDK errors while recording a login failure without hiding read or write failures", async () => {
+    const policy = { now: "2026-10-09T00:00:00.000Z", maxFailures: 5, blockMilliseconds: 900_000 };
+    for (const operation of ["get", "set"] as const) {
+      const error = cloudBaseError(`login ${operation} failed`);
+      const set = vi.fn().mockResolvedValue(operation === "set" ? error : {});
+      const transaction = transactionDocument({ get: operation === "get" ? error : { data: null }, set });
+      const database = { runTransaction: async (callback: (value: typeof transaction) => Promise<unknown>) => callback(transaction) };
+      const persistence = new NodeCloudBasePersistence({ database: () => database } as unknown as CloudBase);
+
+      await expect(persistence.recordLoginFailure("attempt-id", policy)).rejects.toBe(error);
+      expect(set).toHaveBeenCalledTimes(operation === "set" ? 1 : 0);
+    }
+  });
+
+  it.each([false, true])("recalculates a login failure on the installed SDK transaction retry with throwOnCode=%s", async (throwOnCode) => {
+    const testRequire = createRequire(import.meta.url);
+    const nodeSdkRequire = createRequire(testRequire.resolve("@cloudbase/node-sdk/package.json"));
+    const { Db } = nodeSdkRequire(nodeSdkRequire.resolve("@cloudbase/database")) as {
+      Db: { new(config?: unknown): unknown; reqClass: unknown };
+    };
+    const originalRequestClass = Db.reqClass;
+    const writes: Array<Record<string, unknown>> = [];
+    const databaseRequire = createRequire(nodeSdkRequire.resolve("@cloudbase/database"));
+    const { EJSON } = databaseRequire("bson") as { EJSON: { parse(value: string): unknown } };
+    const reads: number[] = [];
+    let latest = { failures: 3, blockedUntil: null as string | null };
+    let starts = 0;
+    let commits = 0;
+    const staged = new Map<string, typeof latest>();
+    class FakeDatabaseRequest {
+      async send(interfaceName: string, parameters: Record<string, unknown> = {}): Promise<Record<string, unknown>> {
+        const transactionId = String(parameters.transactionId);
+        if (interfaceName === "database.startTransaction") return { transactionId: `login-transaction-${++starts}` };
+        if (interfaceName === "database.getDocument") {
+          expect(parameters.collectionName).toBe("login_attempts");
+          expect(JSON.parse(String(parameters.query))).toEqual({ _id: "attempt-id" });
+          expect(transactionId).toMatch(/^login-transaction-/);
+          reads.push(latest.failures);
+          return { data: { list: [JSON.stringify({ _id: "attempt-id", ...latest })] }, requestId: "read-login" };
+        }
+        if (interfaceName === "database.modifyDocument") {
+          expect(parameters.collectionName).toBe("login_attempts");
+          expect(parameters.merge).toBe(false);
+          const data = EJSON.parse(String(parameters.data)) as typeof latest;
+          writes.push(structuredClone(data));
+          staged.set(transactionId, data);
+          return { data: { updated: 1 }, requestId: "write-login" };
+        }
+        if (interfaceName === "database.commitTransaction") {
+          if (++commits === 1) {
+            // A different instance commits a fourth failure; this transaction must read again.
+            latest = { failures: 4, blockedUntil: null };
+            return { code: "DATABASE_TRANSACTION_CONFLICT", message: "concurrent failure", requestId: "conflict-login" };
+          }
+          latest = staged.get(transactionId)!;
+          return { requestId: "commit-login" };
+        }
+        if (interfaceName === "database.abortTransaction") return { requestId: "abort-login" };
+        throw new Error(`unexpected installed database request: ${interfaceName}`);
+      }
+    }
+    try {
+      Db.reqClass = FakeDatabaseRequest;
+      const database = new Db({ throwOnCode });
+      const persistence = new NodeCloudBasePersistence({ database: () => database } as unknown as CloudBase);
+      const expected = { failures: 5, blockedUntil: "2026-10-09T00:15:00.000Z" };
+
+      await expect(persistence.recordLoginFailure("attempt-id", {
+        now: "2026-10-09T00:00:00.000Z", maxFailures: 5, blockMilliseconds: 900_000
+      })).resolves.toEqual(expected);
+
+      expect(reads).toEqual([3, 4]);
+      expect(writes).toEqual([{ failures: 4, blockedUntil: null }, expected]);
+      expect(latest).toEqual(expected);
+      expect(starts).toBe(2);
+    } finally {
+      Db.reqClass = originalRequestClass;
+    }
+  });
+
+  it("stops after six installed SDK transaction callbacks and throws the last conflict when retries are exhausted", async () => {
+    const testRequire = createRequire(import.meta.url);
+    const nodeSdkRequire = createRequire(testRequire.resolve("@cloudbase/node-sdk/package.json"));
+    const { Db } = nodeSdkRequire(nodeSdkRequire.resolve("@cloudbase/database")) as {
+      Db: { new(config?: unknown): unknown; reqClass: unknown };
+    };
+    const originalRequestClass = Db.reqClass;
+    const conflicts: Array<{ code: string; message: string; requestId: string }> = [];
+    let starts = 0;
+    let callbacks = 0;
+    let reads = 0;
+    let writes = 0;
+    class FakeDatabaseRequest {
+      async send(interfaceName: string): Promise<Record<string, unknown>> {
+        if (interfaceName === "database.startTransaction") return { transactionId: `exhausted-login-${++starts}` };
+        if (interfaceName === "database.getDocument") {
+          reads += 1;
+          return { data: { list: [] }, requestId: "read-login" };
+        }
+        if (interfaceName === "database.modifyDocument") {
+          writes += 1;
+          return { data: { updated: 0, upsert_id: "attempt-id" }, requestId: "write-login" };
+        }
+        if (interfaceName === "database.commitTransaction") {
+          const conflict = {
+            code: "DATABASE_TRANSACTION_CONFLICT", message: "concurrent failure",
+            requestId: `conflict-login-${conflicts.length + 1}`
+          };
+          conflicts.push(conflict);
+          return conflict;
+        }
+        if (interfaceName === "database.abortTransaction") return { requestId: "abort-login" };
+        throw new Error(`unexpected installed database request: ${interfaceName}`);
+      }
+    }
+    try {
+      Db.reqClass = FakeDatabaseRequest;
+      const database = new Db({ throwOnCode: false }) as {
+        runTransaction(callback: (transaction: unknown) => Promise<unknown>, retries?: number): Promise<unknown>;
+      };
+      const installedRunTransaction = database.runTransaction.bind(database);
+      database.runTransaction = (callback, retries) => installedRunTransaction(async (transaction) => {
+        callbacks += 1;
+        return callback(transaction);
+      }, retries);
+      const persistence = new NodeCloudBasePersistence({ database: () => database } as unknown as CloudBase);
+
+      const result = await persistence.recordLoginFailure("attempt-id", {
+        now: "2026-10-09T00:00:00.000Z", maxFailures: 5, blockMilliseconds: 900_000
+      }).catch((error: unknown) => error);
+
+      expect(starts).toBe(6);
+      expect(callbacks).toBe(6);
+      expect(reads).toBe(6);
+      expect(writes).toBe(6);
+      expect(conflicts).toHaveLength(6);
+      expect(result).toBe(conflicts[5]);
+    } finally {
+      Db.reqClass = originalRequestClass;
+    }
+  });
+
   it("returns an exact Uint8Array view for a downloaded Buffer subarray", async () => {
     const source = Buffer.allocUnsafe(32);
     source.set([10, 20, 30, 40], 7);

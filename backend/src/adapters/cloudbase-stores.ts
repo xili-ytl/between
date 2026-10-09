@@ -32,6 +32,7 @@ import type {
   InitializeProfilesResult,
   LoginAttemptRecord,
   LoginAttemptStore,
+  LoginFailurePolicy,
   ContactRemarkStore,
   ImageStorage,
   MessageStore,
@@ -55,6 +56,8 @@ export interface CloudPersistence {
   getDocument(collection: string, id: string): Promise<DocumentData | null>;
   findOne(collection: string, equality: Record<string, unknown>): Promise<DocumentData | null>;
   putDocument(collection: string, id: string, data: DocumentData): Promise<void>;
+  /** Must use the shared database transaction boundary, including expired-lock reset. */
+  recordLoginFailure(id: string, policy: LoginFailurePolicy): Promise<LoginAttemptRecord>;
   removeDocument(collection: string, id: string): Promise<void>;
   putIfAbsent(collection: string, id: string, data: DocumentData): Promise<DocumentData>;
   putIfAbsentWithStatus(
@@ -180,6 +183,10 @@ export class CloudBaseLoginAttemptStore implements LoginAttemptStore {
 
   async save(accountId: AccountId, source: string, record: LoginAttemptRecord): Promise<void> {
     await this.cloud.putDocument("login_attempts", attemptId(accountId, source), { ...record });
+  }
+
+  async recordFailure(accountId: AccountId, source: string, policy: LoginFailurePolicy): Promise<LoginAttemptRecord> {
+    return this.cloud.recordLoginFailure(attemptId(accountId, source), policy);
   }
 
   async clear(accountId: AccountId, source: string): Promise<void> {

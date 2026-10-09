@@ -9,12 +9,23 @@ backend/.env.example 是字段说明，脚本不会自动加载它。通过 shel
 ## 自有 CloudBase
 
 1. 新建环境与文档数据库。复制 cloudbaserc.example.json 为被忽略的 cloudbaserc.json，填写自己的 envId。
-2. 按 adapters 中的集合名创建文档集合，权限设为仅管理员可读写，客户端只经过函数访问。集合包括用户、关系、消息、动态/点赞/评论、回执、备注、登录限流、推送注册、pet、petSessions、wenliAgentJobs、wenliMemories；具体名字以源码为准。
+2. 部署函数前，按下面的精确名称预创建文档集合，权限设为仅管理员可读写，客户端只经过函数访问。函数业务入口不建集合，也不吞掉建集合错误。
 3. 在 backend 执行 npm run build:function，部署完整 functions/chat-api 目录，包含其 CommonJS package.json。不能只上传 index.js 后继承 backend 的 ESM 设置。
 4. 函数使用 Nodejs20.19、index.main、256 MB、60 秒。设置随机长值 BACKUP_ADMIN_TOKEN；API 和推送密钥只放服务端。
 5. 配置函数网关，获取 URL 和客户端 Publishable Key。管理员云密钥不能作为手机 Publishable Key；业务仍需账号/session 鉴权。
 6. 只对全新、自有、隔离环境初始化：维护 shell 临时提供 CLOUDBASE_FUNCTION_URL、CLOUDBASE_PUBLISHABLE_KEY、BACKUP_ADMIN_TOKEN、INITIAL_CHAT_PASSWORD，然后 npm run seed。账号见 domain/contracts.ts。登录后分别改密码、昵称与头像。
 7. 构建 Debug APK，用隔离账号检查双端流程。不要拿生产账号做自动验收。
+
+| 集合名称 | 用途 |
+|---|---|
+| users、relationships | 固定双账号与关系 |
+| messages、readStates | 追加聊天、接收与阅读状态 |
+| moments、momentLikes、momentComments | 共享动态、点赞和评论 |
+| contactRemarks、login_attempts、pushRegistrations | 备注、登录失败限流和可选推送注册 |
+| pet、petSessions | 共同宠物与独立只读会话 |
+| wenliAgentJobs、wenliMemories | 问理任务与记忆事件 |
+
+这些是 14 个独立集合，名称区分大小写。seed 只补缺失用户与关系，不创建集合。system.health 只证明函数可达，不证明数据库、集合或索引齐备。完整索引配置和从零部署仍待全新环境验收；不要把管理员权限交给手机来绕过配置问题。
 
 smoke:moments 会写入并清理合成动态，仅可在隔离环境执行。seed、restore、smoke 不作生产健康检查。
 

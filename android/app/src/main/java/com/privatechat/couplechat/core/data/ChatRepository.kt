@@ -87,7 +87,6 @@ class ChatRepository(
     private val local: MessageLocalStore,
     private val sessions: SessionManager,
     private val policy: AdaptiveSyncPolicy = AdaptiveSyncPolicy(),
-    private val versionStore: CacheVersionStore = NoOpCacheVersionStore,
     private val readStates: ReadStateRepository? = null,
     private val imageCache: ImageLocalCache? = null,
     private val cursorStore: SyncCursorStore = NoOpSyncCursorStore,
@@ -141,10 +140,8 @@ class ChatRepository(
 
     suspend fun initialSync(): Int {
         readStates?.activateCurrentSession()
-        if (versionStore.shouldClearCache()) {
-            local.clearAll()
-            versionStore.markCacheSynced()
-        }
+        // App releases do not invalidate history. Room owns schema migrations;
+        // merge server pages so cached messages remain readable while offline.
         val inserted = if (local.newest() == null) {
             fetchOlderPage().inserted
         } else {

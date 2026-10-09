@@ -15,7 +15,6 @@ import com.privatechat.couplechat.core.diagnostics.LogWenliTimingSink
 import com.privatechat.couplechat.core.diagnostics.NoOpWenliTimingSink
 import com.privatechat.couplechat.core.data.ChatSearchRepository
 import com.privatechat.couplechat.core.data.ReadStateRepository
-import com.privatechat.couplechat.core.data.SharedPrefsCacheVersionStore
 import com.privatechat.couplechat.core.data.SharedPrefsSyncCursorStore
 import com.privatechat.couplechat.core.data.MomentsRepository
 import com.privatechat.couplechat.core.data.ProfileRepository
@@ -90,7 +89,6 @@ class AppContainer(
         local = messageLocal,
         sessions = sessions,
         policy = AdaptiveSyncPolicy(),
-        versionStore = SharedPrefsCacheVersionStore(context),
         readStates = readStates,
         imageCache = imageLocalCache,
         cursorStore = SharedPrefsSyncCursorStore(context),

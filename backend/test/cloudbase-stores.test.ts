@@ -24,6 +24,7 @@ import {
 } from "../src/domain/contracts.js";
 import type { WenliAgentJob } from "../src/domain/wenli-agent.js";
 import type { WenliMemoryRecord } from "../src/domain/wenli-memory.js";
+import type { LoginFailurePolicy } from "../src/ports/stores.js";
 import { MomentService } from "../src/services/moment-service.js";
 import { WenliTriggerService } from "../src/services/wenli-trigger-service.js";
 import { ChatService } from "../src/services/chat-service.js";
@@ -755,6 +756,20 @@ class FakeCloudPersistence implements CloudPersistence {
 
   async putDocument(collection: string, id: string, data: DocumentData): Promise<void> {
     this.collection(collection).set(id, structuredClone(data));
+  }
+
+  async recordLoginFailure(id: string, policy: LoginFailurePolicy) {
+    const latest = this.collection("login_attempts").get(id);
+    const now = Date.parse(policy.now);
+    const blockedUntil = typeof latest?.blockedUntil === "string" ? latest.blockedUntil : null;
+    if (blockedUntil && Date.parse(blockedUntil) > now) return { failures: Number(latest!.failures), blockedUntil };
+    const failures = (blockedUntil ? 0 : Number(latest?.failures ?? 0)) + 1;
+    const record = {
+      failures,
+      blockedUntil: failures >= policy.maxFailures ? new Date(now + policy.blockMilliseconds).toISOString() : null
+    };
+    this.collection("login_attempts").set(id, structuredClone(record));
+    return record;
   }
 
   async removeDocument(collection: string, id: string): Promise<void> {
