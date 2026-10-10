@@ -51,5 +51,5 @@ jobs:
         with:
           packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
           log-accepted-android-sdk-licenses: 'false'
-      - run: bash ./gradlew testDebugUnitTest lintDebug assembleDebug --no-daemon --console=plain
+      - run: bash ./gradlew testDebugUnitTest lintDebug assembleDebug --no-daemon --console=plain --info
         working-directory: android
