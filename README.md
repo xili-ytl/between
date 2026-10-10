@@ -1,5 +1,7 @@
 # 之间 · Between
 
+[![Verify source](https://github.com/xili-ytl/between/actions/workflows/ci.yml/badge.svg)](https://github.com/xili-ytl/between/actions/workflows/ci.yml)
+
 **可自行部署的双人空间，和一个有来源记录的共同 AI 伙伴。**
 
 *A private space for two, with a shared AI companion.*
@@ -10,7 +12,7 @@
 
 Android 客户端使用 Kotlin、Jetpack Compose 和 Room；TypeScript 后端运行于腾讯 CloudBase。两个固定成员可以聊天、分享动态，并在共同聊天中 @问理。问理读取有界的聊天、动态和图片上下文，记录经过来源校验的偏好，支持纠正与撤回。
 
-目前是源码预览候选，尚未上传 GitHub 或完成生产发行验收。角色、账号和头像均为合成示例，不含原用户内容。原创代码采用 [MIT](LICENSE)；安全问题的报告方式见 [SECURITY](docs/SECURITY.md)。全新云环境和设备验收仍待完成。
+当前提供源码预览，尚未完成生产发行验收。角色、账号和头像均为合成示例，不含原用户内容。原创代码采用 [MIT](LICENSE)；安全问题的报告方式见 [SECURITY](docs/SECURITY.md)。全新云环境和设备验收仍待完成。
 
 ## 可以做什么
 
