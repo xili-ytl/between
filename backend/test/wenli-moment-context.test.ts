@@ -12,12 +12,12 @@ const post = (id: string, body: string, authorId: "1001" | "1002" = "1001") => (
 describe("read-only shared Moments retrieval", () => {
   it("stops carrying private post context after a topic change or a stale conversation", () => {
     const message = (body: string, createdAt: string): MessageRecord => ({ id: "1002_synthetic", clientMessageId: "synthetic", senderId: "1002", recipientId: "1001", relationshipId: "couple", body, createdAt });
-    const current = message("@问理 那张图是什么颜色", "2026-09-30T04:00:00.000Z");
-    const topic = message("@问理 朋友圈银杏叶照片", "2026-09-30T03:59:00.000Z");
+    const current = message("@小Q 那张图是什么颜色", "2026-09-30T04:00:00.000Z");
+    const topic = message("@小Q 朋友圈银杏叶照片", "2026-09-30T03:59:00.000Z");
     expect(resolveWenliMomentQuery(current, [topic], null)).toContain("朋友圈银杏叶");
-    expect(resolveWenliMomentQuery(current, [topic, message("@问理 教我矩阵快速幂", "2026-09-30T03:59:30.000Z")], null)).toBe(current.body);
+    expect(resolveWenliMomentQuery(current, [topic, message("@小Q 教我矩阵快速幂", "2026-09-30T03:59:30.000Z")], null)).toBe(current.body);
     expect(resolveWenliMomentQuery(current, [{ ...topic, createdAt: "2026-09-29T03:59:00.000Z" }], null)).toBe(current.body);
-    expect(resolveWenliMomentQuery(message("@问理 她为什么这么说", current.createdAt), [topic, message("我们刚讨论过一个新闻事件", "2026-09-30T03:59:30.000Z")], null)).not.toContain("朋友圈");
+    expect(resolveWenliMomentQuery(message("@小Q 她为什么这么说", current.createdAt), [topic, message("我们刚讨论过一个新闻事件", "2026-09-30T03:59:30.000Z")], null)).not.toContain("朋友圈");
   });
 
   it("loads bounded comments only when requested, with their original author and post attribution", async () => {
@@ -41,7 +41,7 @@ describe("read-only shared Moments retrieval", () => {
     expect(result.posts).toHaveLength(1);
   });
 
-  it.each(["@问理 教我动态规划", "HTTP POST 请求是什么", "JavaScript moment 库怎么用", "最近 AI 行业动态"])("does not treat unrelated topics as private Moments: %s", async query => {
+  it.each(["@小Q 教我动态规划", "HTTP POST 请求是什么", "JavaScript moment 库怎么用", "最近 AI 行业动态"])("does not treat unrelated topics as private Moments: %s", async query => {
     const read = vi.fn(async () => []);
     const result = await new StoreWenliMomentContextProvider({ latestVisibleMoments: read }).select(query, signal);
     expect(result.status).toBe("not_requested");
@@ -53,9 +53,9 @@ describe("read-only shared Moments retrieval", () => {
     for (let i = 0; i < 60; i++) await store.appendMomentIfAbsent({ ...post(`new${i}`, "今天喝水散步"), createdAt: `2026-08-30T12:${String(i).padStart(2, "0")}:00.000Z` });
     const spy = vi.spyOn(store, "latestVisibleMoments");
     const provider = new StoreWenliMomentContextProvider(store);
-    expect((await provider.select("@问理 你好呀", signal)).status).toBe("not_requested");
+    expect((await provider.select("@小Q 你好呀", signal)).status).toBe("not_requested");
     expect(spy).not.toHaveBeenCalled();
-    const result = await provider.select("@问理 朋友圈里那片银杏叶在哪条？", signal);
+    const result = await provider.select("@小Q 朋友圈里那片银杏叶在哪条？", signal);
     expect(result.posts[0]?.id).toBe("1002_old");
     expect(result.scanned).toBe(61);
     expect(spy).toHaveBeenCalledOnce();

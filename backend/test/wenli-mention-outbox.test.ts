@@ -13,7 +13,7 @@ const clock = () => new Date(NOW);
 function mention(clientMessageId = "source", overrides: Partial<MessageRecord> = {}): MessageRecord {
   return {
     id: `1001_${clientMessageId}`, relationshipId: "couple", senderId: "1001", recipientId: "1002",
-    clientMessageId, body: "@问理 在吗", createdAt: NOW, ...overrides
+    clientMessageId, body: "@小Q 在吗", createdAt: NOW, ...overrides
   };
 }
 
@@ -30,7 +30,7 @@ describe("durable Wenli mention outbox", () => {
     const trigger = new WenliTriggerService(jobs, messages, clock);
     vi.spyOn(jobs, "createIfAbsent").mockRejectedValueOnce(new Error("temporary"));
 
-    const source = await new ChatService(messages, clock, trigger).send("1001", "recover", "@问理 在吗");
+    const source = await new ChatService(messages, clock, trigger).send("1001", "recover", "@小Q 在吗");
 
     expect(await messages.get(source.id)).toEqual(source);
     expect(await jobs.get(source.id)).toBeNull();
@@ -47,7 +47,7 @@ describe("durable Wenli mention outbox", () => {
   it("retries acknowledgement without replacing the already-created job", async () => {
     const { jobs, messages, trigger } = fixture();
     vi.spyOn(messages, "acknowledgeMention").mockRejectedValueOnce(new Error("temporary"));
-    const source = await new ChatService(messages, clock, trigger).send("1001", "ack", "@问理 在吗");
+    const source = await new ChatService(messages, clock, trigger).send("1001", "ack", "@小Q 在吗");
     const job = await jobs.get(source.id);
     expect(job).toMatchObject({ status: "pending" });
     expect(await messages.getPendingMention(source.id)).toEqual(source);
@@ -71,7 +71,7 @@ describe("durable Wenli mention outbox", () => {
     const { messages, trigger } = fixture();
     const observed = vi.spyOn(trigger, "afterHumanMessage");
     vi.spyOn(messages, "appendIfAbsent").mockRejectedValueOnce(new Error("append failed"));
-    await expect(new ChatService(messages, clock, trigger).send("1001", "failed", "@问理 在吗"))
+    await expect(new ChatService(messages, clock, trigger).send("1001", "failed", "@小Q 在吗"))
       .rejects.toThrow("append failed");
     expect(observed).not.toHaveBeenCalled();
     expect(await messages.get("1001_failed")).toBeNull();
@@ -90,10 +90,10 @@ describe("durable Wenli mention outbox", () => {
     expect(await jobs.get(source.id)).toBeNull();
   });
 
-  it.each(["@问理 在关闭期间发送", "之前的普通消息"])("does not arm a duplicate originally sent with triggering disabled: %s", async (body) => {
+  it.each(["@小Q 在关闭期间发送", "之前的普通消息"])("does not arm a duplicate originally sent with triggering disabled: %s", async (body) => {
     const { jobs, messages, trigger } = fixture();
     const original = await new ChatService(messages, clock).send("1001", "disabled", body);
-    const retried = await new ChatService(messages, clock, trigger).send("1001", "disabled", "@问理 新正文");
+    const retried = await new ChatService(messages, clock, trigger).send("1001", "disabled", "@小Q 新正文");
     expect(retried).toEqual(original);
     expect(await messages.getPendingMention(original.id)).toBeNull();
     expect(await trigger.reconcilePending(null, 50)).toEqual({ scanned: 0, recovered: 0, failed: 0, nextCursor: null });

@@ -40,25 +40,25 @@ describe("Wenli isolated memory lifecycle", () => {
       return (requests.at(-1)![1]!.content as Array<{ text: string }>)[0]!.text;
     };
     const candidate = { quote: "我喜欢蓝色杯子", subjectId: accountId, topicKey: "preference.cup", kind: "preference", operation: "remember" };
-    await turn("remember", "@问理 记住，我喜欢蓝色杯子，好吗？", candidate);
+    await turn("remember", "@小Q 记住，我喜欢蓝色杯子，好吗？", candidate);
     expect(await memories.listForContext(200)).toMatchObject([{ subjectId: accountId, sourceEventIds: [`${accountId}_remember`] }]);
-    await turn("hello", "@问理 你好呀");
-    const recalled = await turn("recall", "@问理 我喜欢哪个颜色的杯子？");
+    await turn("hello", "@小Q 你好呀");
+    const recalled = await turn("recall", "@小Q 我喜欢哪个颜色的杯子？");
     expect(recalled.split("History in chronological order:")[0]).toContain("我喜欢蓝色杯子");
     if (historySize === 1) expect(recalled.split("History in chronological order:")[1]).not.toContain("我喜欢蓝色杯子");
-    const keepPrompt = await turn("keep", "@问理 不要忘记我的杯子偏好", { ...candidate, quote: "不要忘记我的杯子偏好", operation: "forget" });
+    const keepPrompt = await turn("keep", "@小Q 不要忘记我的杯子偏好", { ...candidate, quote: "不要忘记我的杯子偏好", operation: "forget" });
     expect(keepPrompt).toContain("Verified memory command (application metadata): none");
     expect(await memories.listForContext(200)).toMatchObject([{ sourceEventIds: [`${accountId}_remember`] }]);
-    await turn("correct", "@问理 纠正一下，我现在喜欢绿色杯子", { ...candidate, quote: "我现在喜欢绿色杯子", operation: "correct" });
-    await turn("hello2", "@问理 你好呀");
-    const corrected = await turn("recall2", "@问理 我喜欢哪个颜色的杯子？");
+    await turn("correct", "@小Q 纠正一下，我现在喜欢绿色杯子", { ...candidate, quote: "我现在喜欢绿色杯子", operation: "correct" });
+    await turn("hello2", "@小Q 你好呀");
+    const corrected = await turn("recall2", "@小Q 我喜欢哪个颜色的杯子？");
     expect(corrected).toContain("我现在喜欢绿色杯子");
     expect(corrected).not.toContain("我喜欢蓝色杯子");
     // Live MiMo sometimes acknowledges forgetting but emits no candidate at all.
-    const forgetPrompt = await turn("forget", "@问理 忘记我的杯子偏好", null);
+    const forgetPrompt = await turn("forget", "@小Q 忘记我的杯子偏好", null);
     expect(forgetPrompt).toContain(`Verified memory command (application metadata): {"operation":"forget","subjectId":"${accountId}","topicKey":"preference.cup","eligible":true}`);
-    await turn("hello3", "@问理 你好呀");
-    const forgotten = await turn("recall3", "@问理 我喜欢哪个颜色的杯子？");
+    await turn("hello3", "@小Q 你好呀");
+    const forgotten = await turn("recall3", "@小Q 我喜欢哪个颜色的杯子？");
     expect(forgotten).not.toContain("我喜欢蓝色杯子");
     expect(forgotten).not.toContain("我现在喜欢绿色杯子");
     expect(await memories.listForContext(200)).toEqual([]);
@@ -68,7 +68,7 @@ describe("Wenli isolated memory lifecycle", () => {
 
   it("does not adopt a model-written human fact without an exact current human quote", async () => {
     const { buildSourcedMemory } = await import("../src/domain/wenli-memory-candidate.js");
-    const source: MessageRecord = { id: "1002_ask", clientMessageId: "ask", senderId: "1002", recipientId: "1001", relationshipId: "couple", body: "@问理 我喜欢什么杯子", createdAt: "2026-09-30T04:00:00.000Z" };
+    const source: MessageRecord = { id: "1002_ask", clientMessageId: "ask", senderId: "1002", recipientId: "1001", relationshipId: "couple", body: "@小Q 我喜欢什么杯子", createdAt: "2026-09-30T04:00:00.000Z" };
     expect(buildSourcedMemory({ quote: "我喜欢绿色杯子", subjectId: "1002", topicKey: "preference.cup", kind: "preference", operation: "remember" }, source)).toBeNull();
   });
 });

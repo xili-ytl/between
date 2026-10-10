@@ -40,14 +40,14 @@ describe("Q pet AI app wiring", () => {
 
   it("reads the DeepSeek key and model only from server environment", async () => {
     const fetchFn = vi.fn<typeof fetch>(async () => new Response(JSON.stringify({
-      choices: [{ message: { content: "云端问理" } }]
+      choices: [{ message: { content: "云端小Q" } }]
     }), { status: 200 }));
     const service = createPetAiServiceFromEnv(pets, {
       DEEPSEEK_API_KEY: "cloudbase-secret",
       DEEPSEEK_MODEL: "deepseek-server-model"
     }, fetchFn);
 
-    await expect(service?.chat("1002", "你好")).resolves.toEqual({ reply: "云端问理" });
+    await expect(service?.chat("1002", "你好")).resolves.toEqual({ reply: "云端小Q" });
     const [, init] = fetchFn.mock.calls[0]!;
     expect(new Headers(init?.headers).get("authorization")).toBe("Bearer cloudbase-secret");
     expect(JSON.parse(String(init?.body)).model).toBe("deepseek-server-model");
@@ -62,7 +62,7 @@ describe("mobile Wenli shadow wiring", () => {
     { WENLI_MOBILE_SHADOW_ENABLED: "0" }
   ])("always queues mentions so another executor can pick them up", (env) => {
     // 排队与执行分离：关掉云端执行（shadow=0）时，任务仍必须被创建，
-    // 否则本机 runner 永远领不到任务，问理完全不回话。
+    // 否则本机 runner 永远领不到任务，小Q完全不回话。
     expect(createWenliTriggerFromEnv(new MemoryWenliAgentJobStore(), new MemoryMessageStore(), env))
       .toBeInstanceOf(WenliTriggerService);
   });
@@ -83,7 +83,7 @@ describe("mobile Wenli shadow wiring", () => {
       senderId: "1002",
       recipientId: "1001",
       clientMessageId: "ask-1",
-      body: "@问理 你好",
+      body: "@小Q 你好",
       createdAt: "2026-08-30T00:00:00.000Z"
     }, { captureWenliMention: true });
     await trigger!.afterHumanMessage(source);

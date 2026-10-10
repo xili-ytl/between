@@ -18,7 +18,7 @@ describe("backup verification script", () => {
 
     expect(readFile).toHaveBeenCalledWith("fixture.chatbackup");
     expect(output).toHaveBeenCalledWith(
-      "备份版本 4：账号 1，关系 1，动态 1，点赞 1，评论 1，消息 1，问理任务 0，问理记忆 0。\n"
+      "备份版本 4：账号 1，关系 1，动态 1，点赞 1，评论 1，消息 1，小Q任务 0，小Q记忆 0。\n"
     );
     expect(environment.BACKUP_PASSPHRASE).toBeUndefined();
   });

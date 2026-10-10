@@ -147,7 +147,7 @@ export class DeepSeekVisionReplyGenerator implements WenliReplyGenerator {
       return { names, memoryCandidates, historyChronological, quote, moments, blocks };
     });
     const { names, memoryCandidates, historyChronological, quote, moments, blocks } = prepared;
-    if (moments.status === "empty") return { reply: /(?:你|问理).*(?:能不能|能|可以|会).*(?:看|读|查看).*朋友圈/u.test(input.source.body) ? "能呀，我可以看之间里你们共同可见的朋友圈。不过这次没有读到动态，先不编给你听 ^ ^" : "我查了能检索到的朋友圈动态，暂时没找到对应的内容。你给我个关键词，我再帮你找找？", memoryUpdate: null };
+    if (moments.status === "empty") return { reply: /(?:你|小Q).*(?:能不能|能|可以|会).*(?:看|读|查看).*朋友圈/u.test(input.source.body) ? "能呀，我可以看之间里你们共同可见的朋友圈。不过这次没有读到动态，先不编给你听 ^ ^" : "我查了能检索到的朋友圈动态，暂时没找到对应的内容。你给我个关键词，我再帮你找找？", memoryUpdate: null };
     if (moments.status === "unavailable") return { reply: "我这次没能读到朋友圈动态，先不乱猜。等会儿再试试，好吗？", memoryUpdate: null };
     const web = moments.status !== "not_requested" || this.client.managesWebSearch
       ? {text:JSON.stringify({web:"available_not_used",searched:false,execution:"model_selected_tool"}),sources:[]}
@@ -164,8 +164,8 @@ export class DeepSeekVisionReplyGenerator implements WenliReplyGenerator {
         .filter(message => message.senderId !== "wenli" && /我叫|我是|我的|我在(?!关注|查|搜|研究|了解|看)|咱|他的|她的|私人|出生|生日|住院|休学/u.test(message.body))
         .map(message => message.body.replace(publicSearchQuery(message.body) ?? "\u0000", ""))
     ] : [];
-    const question = input.source.body.replace(/@问理/gu, "").trim();
-    const capabilityOnly = /^(你|问理).*(能不能|能|可以|会).*(联网|上网|搜索)[吗么嘛呀呢?？]*$/u.test(question);
+    const question = input.source.body.replace(/@小Q/gu, "").trim();
+    const capabilityOnly = /^(你|小Q).*(能不能|能|可以|会).*(联网|上网|搜索)[吗么嘛呀呢?？]*$/u.test(question);
     const vagueToday = /^(今天|今日)(都)?发生(了)?什么(事)?(了)?[吗呀呢?？]*$/u.test(question);
     const hasPublicTopic = [quote?.body ?? "", ...historyChronological.slice(-6).filter(message => message.senderId !== "wenli").map(message => message.body)].some(body => publicSearchQuery(body) !== null);
     const completionContext = {
@@ -290,7 +290,7 @@ function formatMessageContext(message: MessageRecord, bodyLimit: number, keepHis
 
 function selectRelevantHistory(query: string, history: MessageRecord[]): Set<string> {
   if (isSimpleExchange(query)) return new Set();
-  const queryPairs = chinesePairs(query.replace(/@问理/gu, ""));
+  const queryPairs = chinesePairs(query.replace(/@小Q/gu, ""));
   return new Set(history.filter(message => message.senderId !== "wenli")
     .map(message => ({ id: message.id, score: [...chinesePairs(message.body)].filter(pair => queryPairs.has(pair)).length }))
     .filter(item => item.score >= 2)
@@ -303,7 +303,7 @@ function isKnownLocalTask(source: MessageRecord, history: readonly MessageRecord
     (/记住|记一下|忘记|纠正|我(?:现在)?喜欢|我的.*(?:偏好|学校|生日)/u.test(text) ||
       (/教我|解释|讲.*(?:原理|算法)|写.*(?:代码|模板|[mM][dD]|Markdown)/u.test(text) && /矩阵|快速幂|二分|排序|算法|公式|数列|斐波那契|代码/iu.test(text)));
   if (local(source.body)) return true;
-  if (!/^(?:给我呀|给我吧|发给我|继续|再讲一遍)[。！!?？\s]*$/u.test(source.body.replace(/@问理/gu, "").trim())) return false;
+  if (!/^(?:给我呀|给我吧|发给我|继续|再讲一遍)[。！!?？\s]*$/u.test(source.body.replace(/@小Q/gu, "").trim())) return false;
   const previous = [...history].reverse().find(message => message.senderId !== "wenli");
   const age = previous ? Date.parse(source.createdAt) - Date.parse(previous.createdAt) : NaN;
   return !!previous && age >= 0 && age <= 15 * 60 * 1000 && local(previous.body);
@@ -312,7 +312,7 @@ function isKnownLocalTask(source: MessageRecord, history: readonly MessageRecord
 function chinesePairs(value: string): Set<string> {
   const pairs = new Set<string>();
   // Split filler phrases before tokenizing: adjacent filler must not create false topic matches.
-  const content = value.replace(/问理|主人|我们|你们|他们|什么|怎么|可以|一下|那个|这个|已经|现在|今天|帮我|给我|回答|解释|然后|应该|知道|请问/gu, " ");
+  const content = value.replace(/小Q|主人|我们|你们|他们|什么|怎么|可以|一下|那个|这个|已经|现在|今天|帮我|给我|回答|解释|然后|应该|知道|请问/gu, " ");
   for (const word of content.match(/[\p{Script=Han}]{2,}/gu) ?? []) for (let index = 0; index < word.length - 1; index++) pairs.add(word.slice(index, index + 2));
   return pairs;
 }

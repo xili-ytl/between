@@ -61,7 +61,7 @@ describe("restore script", () => {
   it("does not restore an old running lease as an active lease", async () => {
     const data = validBackupData();
     data.messages.push({ id: "1001_running", data: { ...data.messages[0]!.data,
-      id: "1001_running", clientMessageId: "running", body: "@问理 你好" } });
+      id: "1001_running", clientMessageId: "running", body: "@小Q 你好" } });
     data.wenliAgentJobs.push({
       id: "1001_running",
       data: {

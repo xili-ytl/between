@@ -4,14 +4,14 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 
 /**
- * 问理召唤（@ 提及）的唯一判定与插入规则。
+ * 小Q召唤（@ 提及）的唯一判定与插入规则。
  *
- * 前后都必须是 token 边界；**`@问理` 后面必须有空格、标点或直接结束**。
- * 所以插入时必须自带尾部空格，否则 `@问理在吗` 这类正文不会被识别。
+ * 前后都必须是 token 边界；**`@小Q` 后面必须有空格、标点或直接结束**。
+ * 所以插入时必须自带尾部空格，否则 `@小Q在吗` 这类正文不会被识别。
  */
 
-/** 问理在「之间」里的固定显示名，同时用作 @ 提及的候选文字。 */
-const val WENLI_DISPLAY_NAME = "问理"
+/** 小Q在「之间」里的固定显示名，同时用作 @ 提及的候选文字。 */
+const val WENLI_DISPLAY_NAME = "小Q"
 
 /** 弹窗插入的完整提及文本：自带一个空格，保证后端正则命中。 */
 const val WENLI_MENTION_INSERT = "@$WENLI_DISPLAY_NAME "
@@ -19,12 +19,12 @@ const val WENLI_MENTION_INSERT = "@$WENLI_DISPLAY_NAME "
 private const val WENLI_MENTION_TOKEN = "@$WENLI_DISPLAY_NAME"
 private val WENLI_MENTION = Regex("(?:^|[\\s，,：:])$WENLI_MENTION_TOKEN(?=$|[\\s，,：:])")
 
-/** 正文是否显式召唤了问理（与后端判定保持一致）。 */
+/** 正文是否显式召唤了小Q（与后端判定保持一致）。 */
 fun isWenliMentionBody(body: String): Boolean = WENLI_MENTION.containsMatchIn(body)
 
 /**
- * 输入框里是否该弹出问理候选。
- * 只在**开头**打 `@`（以及继续补 `问`、`理`）时提示，避免在正文中间误弹。
+ * 输入框里是否该弹出小Q候选。
+ * 只在**开头**打 `@`（以及继续补 `小`、`Q`）时提示，避免在正文中间误弹。
  */
 fun shouldOfferWenliCandidate(input: String): Boolean {
     val text = input.trimStart()
@@ -35,7 +35,7 @@ fun shouldOfferWenliCandidate(input: String): Boolean {
 }
 
 /**
- * 把用户已经打出的那截 `@` / `@问` / `@问理` 替换成完整提及，而不是再追加一遍。
+ * 把用户已经打出的那截 `@` / `@小` / `@小Q` 替换成完整提及，而不是再追加一遍。
  * 传进来的 input 应当以 `@` 结尾。
  */
 fun insertWenliMention(input: String): String = mentionInsertion(input).text
@@ -51,7 +51,7 @@ fun mentionInsertion(input: String): MentionInsertion {
     val base = input.trim()
     val prefix = when {
         base.endsWith("@$WENLI_DISPLAY_NAME") -> base.dropLast(WENLI_DISPLAY_NAME.length + 1)
-        base.endsWith("@问") -> base.dropLast(2)
+        base.endsWith("@小") -> base.dropLast(2)
         base.endsWith("@") -> base.dropLast(1)
         else -> base
     }

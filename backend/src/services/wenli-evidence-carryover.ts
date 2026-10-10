@@ -30,7 +30,7 @@ export interface WenliEvidenceCarryover {
 
 /** 指代式追问：没有新话题信息，只是在指上一轮说过的内容。 */
 export function isReferentialFollowUp(question: string): boolean {
-  const text = question.replace(/@问理/gu, "").trim();
+  const text = question.replace(/@小Q/gu, "").trim();
   if (text.length === 0 || [...text].length > 30) return false;
   return /^(?:那|这)[么样]?|第[一二三四五六七八九十\d]+(?:条|点|个|项|篇|张)?|刚才|上面|上面那|前面那|继续|接着|详细说说|展开说说|再多讲讲|再讲讲/u.test(text);
 }

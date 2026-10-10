@@ -94,16 +94,16 @@ describe("PushService", () => {
   });
 
   it("pushes one request to every registered recipient and skips unregistered ones", async () => {
-    // 问理回复要给双方都推；已退出登录（无 registration_id 记录）的一方跳过，不回退 alias。
+    // 小Q回复要给双方都推；已退出登录（无 registration_id 记录）的一方跳过，不回退 alias。
     await service.register("1001", "registration-1001");
-    await service.pushToMany(["1001", "1002"], "问理回复");
+    await service.pushToMany(["1001", "1002"], "小Q回复");
 
     expect(sent).toHaveLength(1);
     expect(sent[0]).toMatchObject({
       audience: { registration_id: ["registration-1001"] },
       notification: {
         android: {
-          alert: "问理回复",
+          alert: "小Q回复",
           extras: { type: "chat", conversation_id: "couple", recipient_id: "1001" }
         }
       }
@@ -115,7 +115,7 @@ describe("PushService", () => {
   it("pushes to both recipients when both devices are registered", async () => {
     await service.register("1001", "registration-1001");
     await service.register("1002", "registration-1002");
-    await service.pushToMany(["1001", "1002"], "问理回复");
+    await service.pushToMany(["1001", "1002"], "小Q回复");
 
     expect(sent).toHaveLength(2);
     const audience = sent.flatMap((payload) => (payload as { audience: { registration_id: string[] } })

@@ -3,7 +3,7 @@ import type { WenliBackgroundFact } from "./wenli-persona-source.js";
 import { effectiveMemories } from "./wenli-memory-candidate.js";
 
 const TOPICS: ReadonlyArray<[WenliBackgroundFact["topic"], RegExp]> = [
-  ["origin", /为什么叫问理|名字.*(来|取|起)|名字的含义|复活|回来|童年|起源|一起养|企鹅.*(过去|故事)|Q\s*宠|亚托莉/iu],
+  ["origin", /为什么叫小Q|名字.*(来|取|起)|名字的含义|复活|回来|童年|起源|一起养|企鹅.*(过去|故事)|Q\s*宠|亚托莉/iu],
   ["birthday", /生日|哪天出生|出生日期|几岁|多大了/u],
   ["school", /学校|大学|专业|年级|大[一二三四]|高[一二三]|读几年|在哪.*(读|学)|学段/u],
   ["competition", /ACM|ICPC|蓝桥|比赛|竞赛|奖项|获奖|省金|国一/iu],
@@ -45,7 +45,7 @@ export function selectWenliMemories(query: string, records: readonly WenliMemory
 }
 
 export function isSimpleExchange(query: string): boolean {
-  const text = query.replace(/@问理/gu, "").trim().replace(/[，。！？!?~～\s]/gu, "");
+  const text = query.replace(/@小Q/gu, "").trim().replace(/[，。！？!?~～\s]/gu, "");
   return /^(你好(呀|啊)?|嗨|hello|hi|在吗|qwq|QwQ|谢谢|谢啦|你是谁(呀)?|我是谁(呀)?|你是男生还是女生|我是男生还是女生)$/iu.test(text);
 }
 
@@ -55,7 +55,7 @@ function keywords(text: string): Set<string> {
     if (/^[a-z0-9]+$/u.test(word)) result.add(word);
     else for (let index = 0; index < word.length - 1; index++) {
       const pair = word.slice(index, index + 2);
-      if (!/^(问理|主人|一下|这个|那个|可以|什么|记得|我们|你们|喜欢|不思|思问|示例甲)$/u.test(pair)) result.add(pair);
+      if (!/^(小Q|主人|一下|这个|那个|可以|什么|记得|我们|你们|喜欢|不思|思问|示例甲)$/u.test(pair)) result.add(pair);
     }
   }
   return result;

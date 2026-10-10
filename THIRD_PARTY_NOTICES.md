@@ -2,6 +2,10 @@
 
 The project's [MIT License](LICENSE) covers original project code, documentation, and synthetic examples. It does not relicense the third-party resources or dependencies described below. Their own notices, license texts, exceptions, and applicable service terms continue to apply. This repository is a source preview; distribution of an APK or function package requires checking the artifacts actually included in that distribution.
 
+## Independent desktop Q-pet (not distributed here)
+
+The independent desktop Q-pet mentioned in the README is based on [qqpet_automation](https://github.com/xuemian168/qqpet_automation). That client and its QQ-pet assets are not included in this repository. Its [license and scope](https://github.com/xuemian168/qqpet_automation/blob/main/LICENSE) cover the community project's original work, not Tencent's trademarks, artwork, audio or original program. This repository's MIT license does not authorize those assets or imply a Tencent partnership.
+
 ## Phosphor Icons
 
 - Package: `@phosphor-icons/core`

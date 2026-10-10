@@ -51,7 +51,7 @@ class ChatScreenTest {
             "wenli_reply_test", "couple", "wenli", "1002", "reply_test", "我在呢",
             "2026-08-31T00:00:00.000Z", replyToMessageId = "1001_source",
         )
-        val own = wenli.copy(id = "1001_source", senderId = "1001", body = "@问理 你好", replyToMessageId = null)
+        val own = wenli.copy(id = "1001_source", senderId = "1001", body = "@小Q 你好", replyToMessageId = null)
         val partner = wenli.copy(id = "1002_quote", senderId = "1002", body = "听见啦", replyToMessageId = wenli.id)
         compose.setContent {
             ChatScreen(
@@ -62,8 +62,8 @@ class ChatScreenTest {
                 onOpenOwnProfile = { ownOpens++ }, onOpenProfile = { partnerOpens++ },
             )
         }
-        compose.onAllNodesWithText("问理").assertCountEquals(2)
-        compose.onNodeWithContentDescription("问理的头像").assertHasNoClickAction().performTouchInput { click() }
+        compose.onAllNodesWithText("小Q").assertCountEquals(2)
+        compose.onNodeWithContentDescription("小Q的头像").assertHasNoClickAction().performTouchInput { click() }
         compose.runOnIdle {
             assertEquals(0, ownOpens)
             assertEquals(0, partnerOpens)
@@ -75,7 +75,7 @@ class ChatScreenTest {
             assertEquals(1, partnerOpens)
         }
         compose.onNodeWithTag("chat-quote-preview").assertExists()
-        compose.onNodeWithText("问理：我在呢").assertExists()
+        compose.onNodeWithText("小Q：我在呢").assertExists()
     }
 
     @Test
@@ -97,15 +97,15 @@ class ChatScreenTest {
             )
         }
 
-        compose.onNodeWithContentDescription("问理的头像").performTouchInput { longClick() }
+        compose.onNodeWithContentDescription("小Q的头像").performTouchInput { longClick() }
         compose.waitForIdle()
         compose.runOnIdle {
-            assertEquals("保留草稿 @问理 ", state.input)
+            assertEquals("保留草稿 @小Q ", state.input)
             assertEquals(sampleWenliMessage(), state.quotedMessage)
         }
         compose.onNodeWithText("复制").assertDoesNotExist()
-        compose.onNodeWithContentDescription("问理的头像").performTouchInput { longClick() }
-        compose.runOnIdle { assertEquals("保留草稿 @问理 ", state.input) }
+        compose.onNodeWithContentDescription("小Q的头像").performTouchInput { longClick() }
+        compose.runOnIdle { assertEquals("保留草稿 @小Q ", state.input) }
     }
 
     @Test
@@ -255,7 +255,7 @@ class ChatScreenTest {
 
     private fun sampleWenliMessage() = ChatMessage(
         id = "wenli_long_press", relationshipId = "couple", senderId = "wenli", recipientId = "1001",
-        clientMessageId = "long_press", body = "问理在呢", createdAt = "2026-09-09T00:00:00Z",
+        clientMessageId = "long_press", body = "小Q在呢", createdAt = "2026-09-09T00:00:00Z",
         replyToMessageId = "1001_source",
     )
 

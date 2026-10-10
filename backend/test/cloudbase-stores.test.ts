@@ -53,7 +53,7 @@ describe("CloudBase stores", () => {
   it("captures a mention atomically while projecting out internal metadata from every public message read", async () => {
     const cloud = new FakeCloudPersistence();
     const messages = new CloudBaseMessageStore(cloud);
-    const source: MessageRecord = { id: "1001_outbox", relationshipId: "couple", senderId: "1001", recipientId: "1002", clientMessageId: "outbox", body: "@问理 在吗", createdAt: "2026-08-31T00:00:00.000Z" };
+    const source: MessageRecord = { id: "1001_outbox", relationshipId: "couple", senderId: "1001", recipientId: "1002", clientMessageId: "outbox", body: "@小Q 在吗", createdAt: "2026-08-31T00:00:00.000Z" };
     const put = vi.spyOn(cloud, "putIfAbsent");
     const appended = await messages.appendIfAbsent({ ...source, wenliMentionPending: false } as MessageRecord, { captureWenliMention: true });
     expect(put).toHaveBeenCalledExactlyOnceWith("messages", source.id, { ...source, wenliMentionPending: true });
@@ -68,7 +68,7 @@ describe("CloudBase stores", () => {
     await messages.acknowledgeMention("missing");
     expect(await cloud.getDocument("messages", source.id)).toEqual({ ...source, wenliMentionPending: false });
     expect(await messages.getPendingMention(source.id)).toBeNull();
-    await messages.appendIfAbsent({ ...source, body: "@问理 different" }, { captureWenliMention: true });
+    await messages.appendIfAbsent({ ...source, body: "@小Q different" }, { captureWenliMention: true });
     expect(await messages.getPendingMention(source.id)).toBeNull();
     expect(await messages.get(source.id)).toEqual(source);
   });
@@ -76,7 +76,7 @@ describe("CloudBase stores", () => {
   it("does not persist forged metadata or arm disabled-era duplicate mentions", async () => {
     const cloud = new FakeCloudPersistence();
     const messages = new CloudBaseMessageStore(cloud);
-    const source: MessageRecord = { id: "1001_disabled", relationshipId: "couple", senderId: "1001", recipientId: "1002", clientMessageId: "disabled", body: "@问理 在吗", createdAt: "2026-08-31T00:00:00.000Z" };
+    const source: MessageRecord = { id: "1001_disabled", relationshipId: "couple", senderId: "1001", recipientId: "1002", clientMessageId: "disabled", body: "@小Q 在吗", createdAt: "2026-08-31T00:00:00.000Z" };
     await messages.appendIfAbsent({ ...source, wenliMentionPending: true } as MessageRecord);
     expect(await cloud.getDocument("messages", source.id)).toEqual(source);
     await messages.appendIfAbsent(source, { captureWenliMention: true });
@@ -90,7 +90,7 @@ describe("CloudBase stores", () => {
     const jobs = new CloudBaseWenliAgentJobStore(cloud);
     const clock = () => new Date("2026-08-31T00:00:00.000Z");
     vi.spyOn(jobs, "createIfAbsent").mockRejectedValueOnce(new Error("temporary"));
-    const source = await new ChatService(messages, clock, new WenliTriggerService(jobs, messages, clock)).send("1001", "recover", "@问理 在吗");
+    const source = await new ChatService(messages, clock, new WenliTriggerService(jobs, messages, clock)).send("1001", "recover", "@小Q 在吗");
     expect(await messages.getPendingMention(source.id)).toEqual(source);
     const restartedMessages = new CloudBaseMessageStore(cloud);
     const restarted = new WenliTriggerService(new CloudBaseWenliAgentJobStore(cloud), restartedMessages, clock);
@@ -102,7 +102,7 @@ describe("CloudBase stores", () => {
     { id: "wrong" }, { body: "ordinary" }, { body: 7 }, { senderId: "unknown" }, { type: "image", body: "普通图片" }
   ])("classifies malformed marked sources as permanent and still handles the healthy ID: %j", async (overrides) => {
     const cloud = new FakeCloudPersistence();
-    const base = { id: "1001_a", relationshipId: "couple", senderId: "1001", recipientId: "1002", clientMessageId: "a", body: "@问理 在吗", createdAt: "2026-08-31T00:00:00.000Z", wenliMentionPending: true };
+    const base = { id: "1001_a", relationshipId: "couple", senderId: "1001", recipientId: "1002", clientMessageId: "a", body: "@小Q 在吗", createdAt: "2026-08-31T00:00:00.000Z", wenliMentionPending: true };
     await cloud.putDocument("messages", "1001_a", { ...base, ...overrides });
     await cloud.putDocument("messages", "1001_b", { ...base, id: "1001_b", clientMessageId: "b" });
     const messages = new CloudBaseMessageStore(cloud);
@@ -123,7 +123,7 @@ describe("CloudBase stores", () => {
       senderId: "1001",
       recipientId: "1002",
       clientMessageId: "retry",
-      body: "@问理 稍后",
+      body: "@小Q 稍后",
       createdAt: "2026-08-31T00:00:00.000Z",
       wenliMentionPending: true
     };

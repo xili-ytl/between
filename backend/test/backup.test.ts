@@ -33,7 +33,7 @@ describe("encrypted chat backup", () => {
   });
   it.each([true, false])("preserves the exact optional mention-intent state %s through canonicalization and encrypted restore", async (pending) => {
     const data = validBackupData();
-    data.messages[0]!.data.body = "@问理 在吗";
+    data.messages[0]!.data.body = "@小Q 在吗";
     data.messages[0]!.data.wenliMentionPending = pending;
     expect(canonicalizeBackupEntry("messages", data.messages[0])).toEqual(data.messages[0]);
     const encrypted = await encryptBackup(data, "mention backup passphrase");
@@ -43,7 +43,7 @@ describe("encrypted chat backup", () => {
 
   it.each(["true", 1, null, {}, []])("rejects non-boolean mention-intent metadata: %j", (pending) => {
     const entry = validBackupData().messages[0]!;
-    entry.data.body = "@问理 在吗";
+    entry.data.body = "@小Q 在吗";
     entry.data.wenliMentionPending = pending;
     expect(() => canonicalizeBackupEntry("messages", entry)).toThrowError(expect.objectContaining({ code: "BACKUP_FORMAT_INVALID" }));
   });
@@ -52,7 +52,7 @@ describe("encrypted chat backup", () => {
     const ordinary = validBackupData().messages[0]!;
     const image = structuredClone(ordinary);
     Object.assign(image.data, { type: "image", body: "", imageFileId: "cloud://env/chat-images/1001_m-1.jpg", imageMimeType: "image/jpeg" });
-    for (const entry of [ordinary, image, validWenliMessageEntry("1001_m-1", "@问理 回答")]) {
+    for (const entry of [ordinary, image, validWenliMessageEntry("1001_m-1", "@小Q 回答")]) {
       entry.data.wenliMentionPending = pending;
       expect(() => canonicalizeBackupEntry("messages", entry)).toThrowError(expect.objectContaining({ code: "BACKUP_FORMAT_INVALID" }));
     }
@@ -206,7 +206,7 @@ describe("encrypted chat backup", () => {
   it("backs up both unfinished and completed Wenli jobs together with dynamic memories", async () => {
     const base = validBackupData();
     base.messages.push({ id: "1002_m-2", data: { ...base.messages[0]!.data, id: "1002_m-2",
-      clientMessageId: "m-2", senderId: "1002", recipientId: "1001", body: "@问理 你好" } });
+      clientMessageId: "m-2", senderId: "1002", recipientId: "1001", body: "@小Q 你好" } });
     const replyId = deterministicWenliReplyId("1002_m-2");
     const reply = validWenliMessageEntry("1002_m-2");
     base.messages.push({ id: replyId, data: { ...reply.data, id: replyId,
@@ -356,7 +356,7 @@ describe("encrypted chat backup", () => {
     expect(restored.data.messages[0]!.data).not.toHaveProperty("type");
   });
 
-  it("accepts a captioned @问理 image with a pending mention intent", async () => {
+  it("accepts a captioned @小Q image with a pending mention intent", async () => {
     const image = {
       id: "1001_img-caption",
       data: {
@@ -365,7 +365,7 @@ describe("encrypted chat backup", () => {
         senderId: "1001",
         recipientId: "1002",
         clientMessageId: "img-caption",
-        body: "@问理 看看这张图",
+        body: "@小Q 看看这张图",
         type: "image",
         imageFileId: "cloud://env/chat-images/1001_img-caption.jpg",
         imageMimeType: "image/jpeg",
@@ -414,7 +414,7 @@ describe("encrypted chat backup", () => {
         senderId: "1001",
         recipientId: "1002",
         clientMessageId: "img-long-caption",
-        body: "@问理 " + "喵".repeat(2000),
+        body: "@小Q " + "喵".repeat(2000),
         type: "image",
         imageFileId: "cloud://env/chat-images/1001_img-long-caption.jpg",
         imageMimeType: "image/jpeg",

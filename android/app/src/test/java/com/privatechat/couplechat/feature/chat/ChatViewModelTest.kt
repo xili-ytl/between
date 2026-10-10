@@ -36,7 +36,7 @@ class ChatViewModelTest {
         var id = 0
         val viewModel = ChatViewModel(source) { (++id).toString() }
         repeat(2) {
-            viewModel.setInput("@问理 在吗")
+            viewModel.setInput("@小Q 在吗")
             viewModel.send()
             runCurrent()
         }
@@ -55,7 +55,7 @@ class ChatViewModelTest {
         val gate = CompletableDeferred<Unit>()
         source.sendGate = gate
         val viewModel = ChatViewModel(source)
-        viewModel.setInput("@问理 在吗")
+        viewModel.setInput("@小Q 在吗")
         viewModel.send()
         runCurrent()
         viewModel.onBackground()
@@ -70,7 +70,7 @@ class ChatViewModelTest {
         val gate = CompletableDeferred<Unit>()
         source.wenliGate = gate
         val viewModel = ChatViewModel(source) { "mention" }
-        viewModel.setInput("@问理 你好")
+        viewModel.setInput("@小Q 你好")
         viewModel.send()
         runCurrent()
         assertFalse(viewModel.state.value.sending)
@@ -88,7 +88,7 @@ class ChatViewModelTest {
     fun similarOrEmbeddedMentionsDoNotKickWenli() = runTest(main.dispatcher) {
         val source = FakeChatDataSource()
         val viewModel = ChatViewModel(source)
-        for (body in listOf("普通消息", "你好@问理", "你好 @问理你好", "@问理呀", "@问理助手")) {
+        for (body in listOf("普通消息", "你好@小Q", "你好 @小Q你好", "@小Q呀", "@小Q助手")) {
             viewModel.setInput(body)
             viewModel.send()
             advanceUntilIdle()
@@ -211,11 +211,11 @@ class ChatViewModelTest {
         viewModel.selectImage(byteArrayOf(1), "image/jpeg", 10, 20)
         assertEquals("  初始说明  ", viewModel.state.value.pendingImage?.caption)
 
-        viewModel.setPendingImageCaption("  @问理 请看  ")
+        viewModel.setPendingImageCaption("  @小Q 请看  ")
         viewModel.confirmPendingImage()
         advanceUntilIdle()
 
-        assertEquals("@问理 请看", source.sent.single().second)
+        assertEquals("@小Q 请看", source.sent.single().second)
         assertEquals("", viewModel.state.value.input)
     }
 
@@ -260,19 +260,19 @@ class ChatViewModelTest {
         viewModel.quote(original)
         viewModel.setInput("原始草稿")
         viewModel.selectImage(byteArrayOf(1), "image/jpeg", 10, 20)
-        viewModel.setPendingImageCaption("  @问理 看看  ")
+        viewModel.setPendingImageCaption("  @小Q 看看  ")
         viewModel.confirmPendingImage()
         advanceUntilIdle()
 
         val failed = viewModel.state.value.failedImage
-        assertEquals("@问理 看看", failed?.caption?.trim())
+        assertEquals("@小Q 看看", failed?.caption?.trim())
         assertEquals(original.id, failed?.replyToMessageId)
         assertEquals("img-1", failed?.clientMessageId)
 
         viewModel.retry()
         advanceUntilIdle()
 
-        assertEquals(listOf("@问理 看看", "@问理 看看"), source.sent.map { it.second })
+        assertEquals(listOf("@小Q 看看", "@小Q 看看"), source.sent.map { it.second })
         assertEquals(listOf(original.id, original.id), source.sent.map { it.third })
         assertEquals(listOf("img-1", "img-1"), source.sent.map { it.first })
     }
@@ -439,19 +439,19 @@ class ChatViewModelTest {
 
         assertFalse(viewModel.state.value.let { shouldOfferWenliCandidate(it.input) })
         viewModel.setInput("@")
-        assertTrue("@ 之后应弹出问理候选", shouldOfferWenliCandidate(viewModel.state.value.input))
+        assertTrue("@ 之后应弹出小Q候选", shouldOfferWenliCandidate(viewModel.state.value.input))
 
         viewModel.setInput(insertWenliMention(viewModel.state.value.input))
-        assertEquals("@问理 ", viewModel.state.value.input)
+        assertEquals("@小Q ", viewModel.state.value.input)
         assertFalse("插入完整提及后不再提示", shouldOfferWenliCandidate(viewModel.state.value.input))
     }
 
     @Test
     fun theInsertedMentionSatisfiesTheSharedTokenRule() = runTest(main.dispatcher) {
-        // 两端都按 token 边界识别；无分隔的 @问理你好 不能误触发。
+        // 两端都按 token 边界识别；无分隔的 @小Q你好 不能误触发。
         assertTrue(isWenliMentionBody(insertWenliMention("@")))
-        assertTrue(isWenliMentionBody("前文 @问理 后文"))
-        assertFalse(isWenliMentionBody("前文 @问理你好"))
+        assertTrue(isWenliMentionBody("前文 @小Q 后文"))
+        assertFalse(isWenliMentionBody("前文 @小Q你好"))
 
         val source = FakeChatDataSource()
         val viewModel = ChatViewModel(source) { "summon" }
@@ -459,17 +459,17 @@ class ChatViewModelTest {
         viewModel.send()
         advanceUntilIdle()
 
-        assertEquals("@问理 帮我看看", source.sent.single().second)
+        assertEquals("@小Q 帮我看看", source.sent.single().second)
         assertEquals(1, source.wenliRequests.size)
     }
 
     @Test
     fun retypingTheMentionDoesNotDuplicateIt() = runTest(main.dispatcher) {
-        // 已经打出 @问 再点候选，不应该变成 @问理 @问
-        assertEquals("@问理 ", insertWenliMention("@"))
-        assertEquals("@问理 ", insertWenliMention("@问"))
-        assertEquals("@问理 ", insertWenliMention("@问理"))
-        assertEquals("@问理 ", insertWenliMention("@问理 "))
+        // 已经打出 @小 再点候选，不应该变成 @小Q @小
+        assertEquals("@小Q ", insertWenliMention("@"))
+        assertEquals("@小Q ", insertWenliMention("@小"))
+        assertEquals("@小Q ", insertWenliMention("@小Q"))
+        assertEquals("@小Q ", insertWenliMention("@小Q "))
     }
 
     @Test
@@ -482,12 +482,12 @@ class ChatViewModelTest {
         )
 
         viewModel.quote(quoted)
-        viewModel.setInput("前文 @问理 后文")
+        viewModel.setInput("前文 @小Q 后文")
         assertEquals(quoted, viewModel.state.value.quotedMessage)
         viewModel.send()
         advanceUntilIdle()
 
-        assertEquals("前文 @问理 后文", source.sent.single().second)
+        assertEquals("前文 @小Q 后文", source.sent.single().second)
         assertEquals(1, source.wenliRequests.size)
     }
 
@@ -495,9 +495,9 @@ class ChatViewModelTest {
     fun insertingTheMentionPutsTheCursorAfterTheTrailingSpace() = runTest(main.dispatcher) {
         // 光标必须落在尾部空格之后，用户才能直接接着打字；
         // 否则 BasicTextField 会把光标留在 @ 后面，用户要手动挪一次。
-        for (draft in listOf("@", "@问", "@问理", "@问理 ", "  @")) {
+        for (draft in listOf("@", "@小", "@小Q", "@小Q ", "  @")) {
             val insertion = mentionInsertion(draft)
-            assertEquals("@问理 ", insertion.text)
+            assertEquals("@小Q ", insertion.text)
             assertEquals(
                 "草稿 \"$draft\" 的光标应在末尾",
                 insertion.text.length,

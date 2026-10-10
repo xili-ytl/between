@@ -17,7 +17,7 @@ class ChatSenderIdentityTest {
     fun wenliIsIndependentFromBothHumanParticipants() {
         for ((own, partner) in listOf(first to second, second to first)) {
             assertEquals(ChatSenderIdentity.WENLI, chatSenderIdentity("wenli", own.accountId, partner.accountId))
-            assertEquals("问理", chatSenderDisplayName("wenli", own, partner))
+            assertEquals("小Q", chatSenderDisplayName("wenli", own, partner))
         }
     }
 

@@ -39,7 +39,7 @@ const petState = {
   updatedBy: "1002" as const
 };
 
-const role = "合成角色：问理是共同养育的中性企鹅，语气自然。";
+const role = "合成角色：小Q是共同养育的中性企鹅，语气自然。";
 const backgroundFacts: WenliBackgroundFact[] = [
   { id: "school-test", subject: "1002", text: "合成学校背景", topic: "school", sensitive: false, asOf: "2026-09-12" },
   { id: "origin-test", subject: "couple", text: "合成起源故事", topic: "origin", sensitive: false, asOf: "2026-09-12" },
@@ -61,7 +61,7 @@ describe("PetAiService", () => {
 
     await expect(service.chat(accountId, "你好")).resolves.toEqual({ reply: "我在呢。" });
     const system = provider.requests[0]!.messages[0]!.content;
-    expect(system).toContain("问理");
+    expect(system).toContain("小Q");
     expect(system).toContain(`当前主人：${owner}`);
     expect(system).toContain(`另一位主人：${partner}`);
     expect(system).toContain("企鹅");
@@ -69,9 +69,9 @@ describe("PetAiService", () => {
     expect(system.includes(`currentSpeakerAccountId=${accountId}`)).toBe(true);
     expect(system.includes("1002=示例甲主人（男）")).toBe(true);
     expect(system.includes("1001=示例乙主人（女）")).toBe(true);
-    expect(system.includes("assistantIdentity=wenli（问理，中性）")).toBe(true);
+    expect(system.includes("assistantIdentity=wenli（小Q，中性）")).toBe(true);
     expect(system.includes("“我是谁”中的我指当前认证主人")).toBe(true);
-    expect(system.includes("“你是谁”中的你指问理")).toBe(true);
+    expect(system.includes("“你是谁”中的你指小Q")).toBe(true);
     expect(provider.requests[0]!.messages.at(-1)).toEqual({ role: "user", content: "你好" });
   });
 

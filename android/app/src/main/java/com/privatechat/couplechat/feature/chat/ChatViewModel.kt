@@ -35,7 +35,7 @@ class ChatViewModel(
     init {
         viewModelScope.launch {
             source.messages.collect { messages ->
-                // 问理的回复已经到达时，熄灭对应的「回复中」。
+                // 小Q的回复已经到达时，熄灭对应的「回复中」。
                 //
                 // 原来这个标记只在 requestWenli（wenli.kick）返回时清除；执行放在本机 Opus 之后，
                 // kick 只是"排了个队"就返回，标记会瞬间消失，而回复还要几十秒才写入，

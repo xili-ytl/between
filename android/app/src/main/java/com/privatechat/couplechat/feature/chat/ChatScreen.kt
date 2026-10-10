@@ -128,13 +128,13 @@ private val ComposerFieldBackground = Color.White
 private val WechatGreen = Color(0xFF07C160)
 private val ImagePlaceholderColor = Color(0xFF8A8A8E)
 
-/** 问理的专属蓝（与蓝企鹅头像一致），只用于 @问理 提及本身。 */
+/** 小Q的专属蓝（与蓝企鹅头像一致），只用于 @小Q 提及本身。 */
 private val WenliBlue = Color(0xFF1E88E5)
 
-private val WenliMentionPattern = Regex("(?:^|[\\s，,：:])@问理(?=$|[\\s，,：:])")
+private val WenliMentionPattern = Regex("(?:^|[\\s，,：:])@小Q(?=$|[\\s，,：:])")
 
 /**
- * 把正文里的 `@问理` 提及标蓝，其余文字保持原色。
+ * 把正文里的 `@小Q` 提及标蓝，其余文字保持原色。
  *
  * 性能：绝大多数消息不含提及，这种情况返回 null（不分配 AnnotatedString，
  * 也不打断 Text 的字符串快路径）；调用方配合 remember 避免重复计算。
@@ -175,7 +175,7 @@ private fun WenliMentionText(body: String, fontSize: TextUnit, repairMalformedGe
     }
 }
 
-/** 输入框里把 `@问理` 提及也标蓝，与气泡保持一致。 */
+/** 输入框里把 `@小Q` 提及也标蓝，与气泡保持一致。 */
 private class WenliMentionHighlight : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
         val mention = annotatedWenliMention(text.text) ?: return TransformedText(text, OffsetMapping.Identity)
@@ -361,7 +361,7 @@ fun ChatScreen(
                     .nestedScroll(dismissKeyboardOnScrollDown),
             )
             if (state.wenliPendingIds.isNotEmpty()) {
-                Text("问理正在回复…", modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).testTag("wenli-pending"), fontSize = 12.sp)
+                Text("小Q正在回复…", modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).testTag("wenli-pending"), fontSize = 12.sp)
             }
             ChatComposer(
                 state = state,
@@ -574,7 +574,7 @@ private fun ChatComposer(
             }
         }
         if (shouldOfferWenliCandidate(state.input)) {
-            // 打出 @ 才提示：点一下插入 "@问理 "（自带空格，后端才认）
+            // 打出 @ 才提示：点一下插入 "@小Q "（自带空格，后端才认）
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -612,7 +612,7 @@ private fun ChatComposer(
             ) { Text("图片") }
             BasicTextField(
                 // 用 TextFieldValue 而不是纯 String：光标、选区和输入法组合态都是输入状态，
-                // 必须完整保存；插入 @问理 时也要能用它指定光标位置。
+                // 必须完整保存；插入 @小Q 时也要能用它指定光标位置。
                 value = textField,
                 onValueChange = { value ->
                     // 整份保存：光标、选区和输入法组合态都属于输入状态。
@@ -631,7 +631,7 @@ private fun ChatComposer(
                 minLines = 1,
                 maxLines = 4,
                 textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
-                // 输入框里的 @问理 也标蓝；只改显示，底层文本不变，光标与选区不受影响
+                // 输入框里的 @小Q 也标蓝；只改显示，底层文本不变，光标与选区不受影响
                 visualTransformation = WenliMentionHighlight(),
                 cursorBrush = SolidColor(WechatGreen),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
@@ -735,7 +735,7 @@ private fun MessageBubble(
                         }
                         .semantics(mergeDescendants = true) {
                             customActions = listOf(
-                                CustomAccessibilityAction("艾特问理") {
+                                CustomAccessibilityAction("艾特小Q") {
                                     onMentionWenli()
                                     true
                                 },
@@ -774,7 +774,7 @@ private fun MessageBubble(
             ) {
                 if (identity == ChatSenderIdentity.WENLI || identity == ChatSenderIdentity.UNKNOWN) {
                     Text(
-                        text = if (identity == ChatSenderIdentity.WENLI) "问理" else "未知发送者",
+                        text = if (identity == ChatSenderIdentity.WENLI) "小Q" else "未知发送者",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -997,7 +997,7 @@ private fun PendingImageDialog(
                     value = pending.caption,
                     onValueChange = onCaptionChanged,
                     label = { Text("添加说明") },
-                    placeholder = { Text("可输入 @问理 请它看看") },
+                    placeholder = { Text("可输入 @小Q 请它看看") },
                     minLines = 2,
                     maxLines = 5,
                     isError = pending.caption.trim().codePointCount(0, pending.caption.trim().length) > 2000,

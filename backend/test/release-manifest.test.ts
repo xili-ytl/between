@@ -9,7 +9,7 @@ describe("current release manifest", () => {
       apkKey: "releases/between-70.apk",
       sha256: "79c1183a3c17269a1cb34b26cdd2d761ddb7037fc7a6f3e3ca35ffc4a87b2144"
     });
-    expect(CURRENT_RELEASE.notes).toBe("修复问理回复中多个代码块的显示错位。");
+    expect(CURRENT_RELEASE.notes).toBe("修复小Q回复中多个代码块的显示错位。");
     expect(CURRENT_RELEASE).not.toMatchObject({
       versionCode: 69,
       versionName: "1.1.36",

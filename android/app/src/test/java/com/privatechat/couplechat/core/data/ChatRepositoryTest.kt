@@ -170,7 +170,7 @@ class ChatRepositoryTest {
             wenliTiming = { event -> events += event },
         )
 
-        repository.send("timing-message", "@问理 记录阶段")
+        repository.send("timing-message", "@小Q 记录阶段")
         repository.requestWenli("1001_timing-message")
 
         assertEquals(listOf("message_confirmation", "kick_request", "client_receive"), events.map { it.stage })

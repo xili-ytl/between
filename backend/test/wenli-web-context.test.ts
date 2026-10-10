@@ -3,7 +3,7 @@ import { publicSearchQuery, prepareWenliWebContext, withVerifiedSources } from "
 describe("public query boundary", () => {
   it("does not search a capability question or an ambiguous day recap", async () => {
     const search=vi.fn(async()=>({searched:true as const,text:"irrelevant",sources:[]}));
-    for(const input of ["@问理 你能联网么","你可以联网嘛？","问理能不能上网呀","你会搜索吗","今天发生什么事了","今天发生了什么事？"]){
+    for(const input of ["@小Q 你能联网么","你可以联网嘛？","小Q能不能上网呀","你会搜索吗","今天发生什么事了","今天发生了什么事？"]){
       const result=await prepareWenliWebContext(input,{search},new AbortController().signal,["查一下今天AI新闻"]);
       expect(result.sources).toEqual([]);
       expect(result.fallbackReply).toBeUndefined();
@@ -37,10 +37,10 @@ describe("public query boundary", () => {
     expect(search).not.toHaveBeenCalled();
   });
   it("searches explicit and current public questions without fetching on greetings or private stories", () => {
-    expect(publicSearchQuery("@问理 今天AI圈发生了哪些事")).toBe("今天AI圈发生了哪些事");
-    expect(publicSearchQuery("@问理 帮我查一下矩阵快速幂的资料")).toBe("查一下矩阵快速幂的资料");
-    expect(publicSearchQuery("@问理 你好")).toBeNull();
-    expect(publicSearchQuery("问理为什么叫问理")).toBeNull();
+    expect(publicSearchQuery("@小Q 今天AI圈发生了哪些事")).toBe("今天AI圈发生了哪些事");
+    expect(publicSearchQuery("@小Q 帮我查一下矩阵快速幂的资料")).toBe("查一下矩阵快速幂的资料");
+    expect(publicSearchQuery("@小Q 你好")).toBeNull();
+    expect(publicSearchQuery("小Q为什么叫小Q")).toBeNull();
   });
   it("never forwards private clauses, owner names, email, credentials or health context", () => {
     expect(publicSearchQuery("我在合成学校读书，帮我查一下今天AI新闻")).toBe("查一下今天AI新闻");

@@ -54,7 +54,7 @@ export class PushService {
   }
 
   /**
-   * 一次给多个账号推送（问理回复要同时提醒双方）。
+   * 一次给多个账号推送（小Q回复要同时提醒双方）。
    * 每个账号独立按 registration_id 判定：没有记录的设备跳过，不回退 alias。
    */
   async pushToMany(
@@ -67,7 +67,7 @@ export class PushService {
     await Promise.all(recipientIds.map((recipientId) => this.pushTo(recipientId, alert, messageId, messageCreatedAt)));
   }
 
-  /** 问理回复：推给固定双方，并带唤醒信号让前台立刻同步。 */
+  /** 小Q回复：推给固定双方，并带唤醒信号让前台立刻同步。 */
   async pushWenli(alert: string, messageId?: string, messageCreatedAt?: string): Promise<void> {
     await this.pushToMany(FIXED_ACCOUNT_IDS, alert, messageId, messageCreatedAt);
   }

@@ -20,7 +20,7 @@ describe("Wenli actual app factory wiring with isolated CloudBase", () => {
       gender: accountId === "1002" ? "男" : "女", avatarKey: null, profileInitializedVersion: 1, passwordHash: "unused",
       sessionHash: accountId === "1002" ? hashSessionToken(token) : null, sessionVersion: 1, updatedAt: now });
     const source = { id: "1002_eval", clientMessageId: "eval", senderId: "1002", recipientId: "1001", relationshipId: "couple",
-      body: "@问理 朋友圈里我发的红色书签照片，示例乙评论了什么？", createdAt: now };
+      body: "@小Q 朋友圈里我发的红色书签照片，示例乙评论了什么？", createdAt: now };
     db.put("messages", source.id, source);
     db.put("wenliAgentJobs", source.id, { id: source.id, type: "mention", requesterId: "1002", sourceMessageId: source.id,
       status: "pending", attemptCount: 0, nextAttemptAt: now, createdAt: now, updatedAt: now });

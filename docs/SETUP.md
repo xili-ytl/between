@@ -23,13 +23,13 @@ backend/.env.example 是字段说明，脚本不会自动加载它。通过 shel
 | moments、momentLikes、momentComments | 共享动态、点赞和评论 |
 | contactRemarks、login_attempts、pushRegistrations | 备注、登录失败限流和可选推送注册 |
 | pet、petSessions | 共同宠物与独立只读会话 |
-| wenliAgentJobs、wenliMemories | 问理任务与记忆事件 |
+| wenliAgentJobs、wenliMemories | 小Q任务与记忆事件 |
 
 这些是 14 个独立集合，名称区分大小写。seed 只补缺失用户与关系，不创建集合。system.health 只证明函数可达，不证明数据库、集合或索引齐备。完整索引配置和从零部署仍待全新环境验收；不要把管理员权限交给手机来绕过配置问题。
 
 smoke:moments 会写入并清理合成动态，仅可在隔离环境执行。seed、restore、smoke 不作生产健康检查。
 
-## 问理（可选）
+## 小Q（可选）
 
 服务端变量：
 
@@ -41,7 +41,7 @@ OPENROUTER_API_KEY=<server-only>
 
 OpenRouter 模型常量在 adapters/openrouter-wenli-client.ts，当前为 MiMo 2.6 Flash，固定上游；该路径不读取 WENLI_MODEL_NAME 切模型。更换时应另做合成评测并核对供应商支持。不需要本机代理或常驻 runner。
 
-未设置开关/密钥时，真人聊天可用，问理执行不可用。公开版本的示例人格不代表真人经历；编辑后按 README 编译。API 会产生独立费用。
+未设置开关/密钥时，真人聊天可用，小Q执行不可用。公开版本的示例人格不代表真人经历；编辑后按 README 编译。API 会产生独立费用。
 
 ## 推送、升级、备份
 
@@ -51,4 +51,4 @@ OpenRouter 模型常量在 adapters/openrouter-wenli-client.ts，当前为 MiMo 
 
 备份入口 npm run backup，内部格式 v4，覆盖 users、relationships、messages、moments、momentLikes、momentComments、readStates、wenliAgentJobs、wenliMemories；外层为加密 envelope。用 npm run verify:backup 独立离线验证，口令与文件分开保存。图片对象字节需另做存储备份。restore 需 ALLOW_RESTORE=YES，只补缺失项，正式操作前先审核方案。
 
-部署后先用 system.health 检查可达，再用隔离账号检查互发、离线补收、查看即可清未读、后台回执、重连和问理。云套餐价格及额度以控制台为准，不保证免费长期运行。
+部署后先用 system.health 检查可达，再用隔离账号检查互发、离线补收、查看即可清未读、后台回执、重连和小Q。云套餐价格及额度以控制台为准，不保证免费长期运行。

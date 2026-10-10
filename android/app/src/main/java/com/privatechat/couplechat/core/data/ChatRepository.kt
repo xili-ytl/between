@@ -571,7 +571,7 @@ class ChatRepository(
         val SAFE_WENLI_TIMING_ID = Regex("[A-Za-z0-9_-]{1,200}")
         val SAFE_WENLI_TIMING_STAGE = Regex("[a-z_]{1,64}")
 
-        fun isWenliMentionForTiming(body: String): Boolean = body.trimStart().startsWith("@问理")
+        fun isWenliMentionForTiming(body: String): Boolean = body.trimStart().startsWith("@小Q")
     }
 }
 

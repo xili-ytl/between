@@ -177,7 +177,7 @@ describe("Wenli reply cache", () => {
   it("gives every new message a fresh reply instead of replaying the first one", async () => {
     // 语义守卫（GPT-6 复核）：应用层缓存只能复用"同一条消息的同一份工作"，
     // 绝不能因为两句输入文字相同就把第一次的回复原样吐出来。
-    // 现实中每条 @问理 都有独立的来源消息 id 与时间，因此键天然不同。
+    // 现实中每条 @小Q 都有独立的来源消息 id 与时间，因此键天然不同。
     const cache = createWenliReplyCache({ directory: await tempDirectory() });
     const first = key({ jobId: "1002_msg-a", sourceMessageId: "1002_msg-a", contextFingerprint: wenliContextFingerprint("你好") });
     const second = key({ jobId: "1002_msg-b", sourceMessageId: "1002_msg-b", contextFingerprint: wenliContextFingerprint("你好") });

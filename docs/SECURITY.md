@@ -2,7 +2,7 @@
 
 两个固定账号共享一段关系。手机不持有数据库管理员凭据，业务走服务端鉴权。session 在同账号新登录时轮换。TLS 保护传输，服务器能读保存的内容，没有端到端加密。
 
-启用问理后，选中的聊天、图片、动态与记忆会送到配置的模型供应商。预算限制规模，不代表内容已匿名化。公开搜索只发受约束的查询。为他人部署前应让双方了解数据流。
+启用小Q后，选中的聊天、图片、动态与记忆会送到配置的模型供应商。预算限制规模，不代表内容已匿名化。公开搜索只发受约束的查询。为他人部署前应让双方了解数据流。
 
 密钥、管理员 token、session、密码、签名/备份私钥、真实配置、备份、私人角色档案、真实聊天图片与诊断输出不能进入 GitHub。客户端 Publishable Key 也应使用公开版自己的配置。
 
@@ -30,7 +30,7 @@
 
 运行时安装链仍为 @cloudbase/node-sdk 3.18.3 及其依赖：axios 0.27.2、@cloudbase/database 1.4.3 的 lodash.set / lodash.unset，以及 signature-nodejs → npm url → qs 6.15.3。
 
-安装源码复查：lodash.set / unset 的相关调用点位于实时 watch 差量处理，应用没有使用 watch；签名模块的 require("url") 在本机 Node 24 实测解析为内置模块，未经过 npm url / qs。Axios 条件性用于固定地址的 SDK 环境探测，应用没有使用 SDK requestClient 或扩展，也未发现把外部请求者的 URL 交给 Axios。常规数据库传输使用原生 http/https，问理上游使用 fetch。
+安装源码复查：lodash.set / unset 的相关调用点位于实时 watch 差量处理，应用没有使用 watch；签名模块的 require("url") 在本机 Node 24 实测解析为内置模块，未经过 npm url / qs。Axios 条件性用于固定地址的 SDK 环境探测，应用没有使用 SDK requestClient 或扩展，也未发现把外部请求者的 URL 交给 Axios。常规数据库传输使用原生 http/https，小Q上游使用 fetch。
 
 这不是全依赖动态覆盖或线上利用验收，不能据此宣布风险消失。仍需核对运行时供应商修复、运行环境与版本兼容；运行时依赖本轮未改，不能用开发工具补丁代替处理。
 

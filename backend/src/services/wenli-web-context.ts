@@ -4,8 +4,8 @@ export interface WenliWebSearch { search(query: string, signal: AbortSignal): Pr
 
 /** Select an explicitly public clause; never concatenate history or a personal profile. */
 export function publicSearchQuery(input: string): string | null {
-  const text = input.replace(/@问理/gu," ").trim();
-  if (/^(你|问理).*(能不能|能|可以|会).*(联网|上网|搜索)[吗么嘛呀呢?？]*$/u.test(text)) return null;
+  const text = input.replace(/@小Q/gu," ").trim();
+  if (/^(你|小Q).*(能不能|能|可以|会).*(联网|上网|搜索)[吗么嘛呀呢?？]*$/u.test(text)) return null;
   if (/^(今天|今日)(都)?发生(了)?什么(事)?(了)?[吗呀呢?？]*$/u.test(text)) return null;
   const clauses = text.split(/[，,。；;\n]/u).map(clause => clause.trim().replace(/^(请|麻烦)?(帮我|替我|给我|我想知道|我想了解|我想要|我想)/u,""));
   for (const clause of clauses.reverse()) {

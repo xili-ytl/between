@@ -4,7 +4,7 @@ import { cleanWenliReply, hasWenliEmoji } from "../src/domain/wenli-reply-text.j
 describe("Wenli visible reply text", () => {
   it.each([
     "(Ｔ▽Ｔ)", ">_<", "X_X", "QwQ", "qwq", "(＾▽＾)", "^ ^",
-    "普通汉字，问理在这里。", "± × ∞ ∑ √ ∆ ≠ ≤ ≥ ↔", "© 2026 ® ™", "©︎ ®︎ ™︎",
+    "普通汉字，小Q在这里。", "± × ∞ ∑ √ ∆ ≠ ≤ ≥ ↔", "© 2026 ® ™", "©︎ ®︎ ™︎",
     "1 234567890 # *", "https://example.com/a?q=1#part", "e\u0301 中文\uFE00"
   ])("preserves ordinary text: %s", text => {
     expect(cleanWenliReply(`  ${text}\n`)).toBe(text);

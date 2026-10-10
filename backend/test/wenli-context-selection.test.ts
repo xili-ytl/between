@@ -24,12 +24,12 @@ describe("context selection before model invocation", () => {
     expect(selectWenliMemories("杯子是什么颜色", records, "2026-09-13T00:00:00.000Z",4,"1001").map(r=>r.id)).toEqual(["old"]);
   });
   it("does not load a profile for greetings, identities, emoticons or algorithm questions", () => {
-    for (const query of ["@问理 你好", "qwq", "我是谁", "你是谁", "讲一下矩阵快速幂"]) {
+    for (const query of ["@小Q 你好", "qwq", "我是谁", "你是谁", "讲一下矩阵快速幂"]) {
       expect(selectWenliBackground(query, "1002", facts)).toEqual([]);
     }
   });
   it("recalls the specific story or owner fact, including mixed greetings and a real question", () => {
-    expect(selectWenliBackground("你为什么叫问理", "1001", facts).map(fact => fact.id)).toEqual(["origin"]);
+    expect(selectWenliBackground("你为什么叫小Q", "1001", facts).map(fact => fact.id)).toEqual(["origin"]);
     expect(selectWenliBackground("你好呀，我在哪所大学", "1002", facts).map(fact => fact.id)).toEqual(["school"]);
     expect(selectWenliBackground("我在哪所大学", "1001", facts)).toEqual([]);
     expect(selectWenliBackground("示例甲在哪所大学", "1001", facts).map(fact => fact.id)).toEqual(["school"]);

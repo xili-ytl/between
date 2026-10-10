@@ -33,8 +33,8 @@ class MessageDaoTest {
         dao.insertAll(listOf(
             row("1001_a", "自己或伴侣", time),
             row("1002_a", "伴侣或自己", time).copy(senderId = "1002", recipientId = "1001"),
-            row("wenli_a", "问理一", time).copy(senderId = "wenli", recipientId = "1001"),
-            row("wenli_b", "问理二", time).copy(senderId = "wenli", recipientId = "1002"),
+            row("wenli_a", "小Q一", time).copy(senderId = "wenli", recipientId = "1001"),
+            row("wenli_b", "小Q二", time).copy(senderId = "wenli", recipientId = "1002"),
             row("other_wenli", "其他关系", time).copy(senderId = "wenli", relationshipId = "other"),
         ))
         for (partner in listOf("1001", "1002")) {

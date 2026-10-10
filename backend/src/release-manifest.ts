@@ -5,7 +5,7 @@ import type { PetReleaseManifest, ReleaseManifest } from "./services/release-ser
 export const CURRENT_RELEASE: ReleaseManifest = {
   versionCode: 70,
   versionName: "1.1.37",
-  notes: "修复问理回复中多个代码块的显示错位。",
+  notes: "修复小Q回复中多个代码块的显示错位。",
   apkKey: "releases/between-70.apk",
   sha256: "79c1183a3c17269a1cb34b26cdd2d761ddb7037fc7a6f3e3ca35ffc4a87b2144"
 };

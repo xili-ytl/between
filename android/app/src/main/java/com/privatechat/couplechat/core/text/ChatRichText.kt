@@ -48,7 +48,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
 
-private const val WENLI_MENTION_TOKEN = "@问理"
+private const val WENLI_MENTION_TOKEN = "@小Q"
 private const val MARKWON_LATEX_DELIMITER = "$$"
 /** Shared so a long LazyColumn cannot create one formula thread pool per visible message. */
 private val ChatLatexExecutor: ExecutorService by lazy {
@@ -59,7 +59,7 @@ private val ChatLatexExecutor: ExecutorService by lazy {
 private val HTML_TAG = Regex("</?[A-Za-z][^>]*>|<!--[\\s\\S]*?-->")
 private val MARKDOWN_IMAGE = Regex("!\\[[^]]*]\\s*(?:\\([^)]*\\)|\\[[^]]*])")
 private val MARKDOWN_EMPHASIS = Regex("""(?<!\w)(\*|_)(?=\S)(.+?\S)\1(?!\w)""")
-private val WENLI_MENTION = Regex("(?:^|[\\s，,：:])@问理(?=$|[\\s，,：:])")
+private val WENLI_MENTION = Regex("(?:^|[\\s，,：:])@小Q(?=$|[\\s，,：:])")
 private val LATEX_COMMAND = Regex("\\\\([A-Za-z]+)")
 private val TABLE_SEPARATOR = Regex("\\|?\\s*:?-{3,}:?\\s*(?:\\|\\s*:?-{3,}:?\\s*)+\\|?")
 private val SUPPORTED_LATEX_COMMANDS = setOf(

@@ -132,7 +132,7 @@ describe("AdminService", () => {
       new MemoryAvatarStore(),
       () => new Date(INITIALIZED_AT)
     );
-    const source = messageEntry("1001", "m-wenli-source", "@问理 在吗");
+    const source = messageEntry("1001", "m-wenli-source", "@小Q 在吗");
     const wenliReply = validWenliMessageEntry(source.id);
 
     await expect(service.importMissingPage("admin-secret", "messages", [source, wenliReply]))

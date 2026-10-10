@@ -81,10 +81,10 @@ export function assertValidWenliSource(
     !validSourceBody(source.body) ||
     !validIsoTimestamp(source.createdAt) ||
     !isHumanWenliMention(source)) {
-    throw new AppError("WENLI_SOURCE_INVALID", "问理触发消息无效");
+    throw new AppError("WENLI_SOURCE_INVALID", "小Q触发消息无效");
   }
   if (!validSourceImageFields(source)) {
-    throw new AppError("WENLI_SOURCE_INVALID", "问理触发消息无效");
+    throw new AppError("WENLI_SOURCE_INVALID", "小Q触发消息无效");
   }
 }
 
@@ -104,18 +104,18 @@ function assertBasicWenliSource(
   source: MessageRecord | null
 ): asserts source is MessageRecord {
   if (!source || source.senderId !== requesterId) {
-    throw new AppError("WENLI_SOURCE_INVALID", "问理触发消息无效");
+    throw new AppError("WENLI_SOURCE_INVALID", "小Q触发消息无效");
   }
 }
 
 function validWenliBody(value: unknown): string {
   if (typeof value !== "string") {
-    throw new AppError("WENLI_REPLY_INVALID", "问理回复内容无效");
+    throw new AppError("WENLI_REPLY_INVALID", "小Q回复内容无效");
   }
   const body = value.trim();
   const length = [...body].length;
   if (length < 1 || length > 4000) {
-    throw new AppError("WENLI_REPLY_INVALID", "问理回复内容无效");
+    throw new AppError("WENLI_REPLY_INVALID", "小Q回复内容无效");
   }
   return body;
 }

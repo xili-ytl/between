@@ -332,14 +332,14 @@ export class ApiRouter {
           ));
         }
         case "wenli.kick": {
-          if (!this.wenli) throw new AppError("WENLI_UNAVAILABLE", "问理暂时不可用");
+          if (!this.wenli) throw new AppError("WENLI_UNAVAILABLE", "小Q暂时不可用");
           return success(await this.wenli.kick(
             user.accountId,
             requiredString(payload, "sourceMessageId")
           ));
         }
         case "wenli.sweep": {
-          if (!this.wenli) throw new AppError("WENLI_UNAVAILABLE", "问理暂时不可用");
+          if (!this.wenli) throw new AppError("WENLI_UNAVAILABLE", "小Q暂时不可用");
           return success(await this.wenli.sweep(typeof payload.limit === "number" ? payload.limit : 2));
         }
         default:

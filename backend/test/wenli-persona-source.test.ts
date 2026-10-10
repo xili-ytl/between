@@ -3,7 +3,7 @@ import { compileWenliPersona } from "../src/domain/wenli-persona-source.js";
 import { readFile } from "node:fs/promises";
 import { WENLI_SOURCE } from "../src/domain/wenli-persona.generated.js";
 
-const source = `# 问理的设定和记忆
+const source = `# 小Q的设定和记忆
 ## 1. 我是谁
 我是合成测试企鹅。
 ## 2. 我怎么认出两位主人

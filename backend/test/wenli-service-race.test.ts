@@ -64,7 +64,7 @@ function mention(id: string): MessageRecord {
     senderId,
     recipientId: senderId === "1001" ? "1002" : "1001",
     clientMessageId: id.slice(5),
-    body: "@问理 在吗",
+    body: "@小Q 在吗",
     createdAt: T0
   };
 }

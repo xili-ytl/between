@@ -63,7 +63,7 @@ describe("WenliJobWorker", () => {
       mention("1001_mismatch", { recipientId: "1001" }),
       mention("1001_bad-client", { clientMessageId: "bad/client", id: "1001_bad/client" }),
       mention("1001_bad-time", { createdAt: "today" }),
-      mention("1001_large", { body: `@问理 ${"问".repeat(2001)}` })
+      mention("1001_large", { body: `@小Q ${"问".repeat(2001)}` })
     ]) {
       await seed(store, messages, source, pendingJob(source));
       await expect(worker.process(source.id)).resolves.toEqual({ claimed: true, completed: false, message: null });
@@ -137,7 +137,7 @@ describe("WenliJobWorker", () => {
 
   it("only persists structured candidates whose exact quote comes from the current human", async () => {
     const { store, messages } = memoryHarness();
-    const source = {...mention("1001_sourced"),body:"@问理 我喜欢蓝色杯子"};
+    const source = {...mention("1001_sourced"),body:"@小Q 我喜欢蓝色杯子"};
     await seed(store,messages,source,pendingJob(source));
     const memories = new MemoryWenliMemoryStore();
     const generator: WenliReplyGenerator = {generate:async()=>({reply:"蓝色杯子，很好看呀 ^ ^",memoryUpdate:null,memoryCandidate:{quote:"我喜欢蓝色杯子",subjectId:"1001",topicKey:"preference.cup",kind:"preference",operation:"remember"}})};
@@ -288,7 +288,7 @@ describe("WenliJobWorker", () => {
     const store = new MemoryWenliJobExecutionStore(messages);
     const clock = () => new Date(T0);
     const chat = new ChatService(messages, clock, new WenliTriggerService(store, messages, clock));
-    const source = await chat.send("1001", "integrated", "@问理 你能看到这条吗");
+    const source = await chat.send("1001", "integrated", "@小Q 你能看到这条吗");
     const generator = generatorReturning("看到了");
 
     await expect(workerWith(store, generator).process(source.id)).resolves.toMatchObject({ claimed: true, completed: true, message: expect.any(Object) });
@@ -356,7 +356,7 @@ function mention(id: string, overrides: Partial<MessageRecord> = {}): MessageRec
     senderId,
     recipientId: senderId === "1001" ? "1002" : "1001",
     clientMessageId,
-    body: "@问理 在吗",
+    body: "@小Q 在吗",
     createdAt: "2026-08-30T23:59:00.000Z",
     ...overrides
   };

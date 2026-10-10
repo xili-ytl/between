@@ -29,8 +29,8 @@ export interface WenliSweepOptions {
 }
 
 /**
- * 问理任务的两个入口：
- * - `kick`：手机端发出 `@问理` 后的加速请求（只是加速，后台 sweep 仍能兜底）。
+ * 小Q任务的两个入口：
+ * - `kick`：手机端发出 `@小Q` 后的加速请求（只是加速，后台 sweep 仍能兜底）。
  * - `sweep`：拉一批到期任务处理，用于手机前台定时兜底与人工补偿。
  * 两条路径都只负责驱动 worker 并推送；回复本身由 worker 在事务内落库。
  */
@@ -63,12 +63,12 @@ export class WenliService {
     const finishTotal = startWenliTiming(timing, "kick_total");
     if (typeof sourceMessageId !== "string" || sourceMessageId.length === 0 || sourceMessageId.length > 200) {
       finishTotal("failure");
-      throw new AppError("WENLI_SOURCE_INVALID", "问理触发消息无效");
+      throw new AppError("WENLI_SOURCE_INVALID", "小Q触发消息无效");
     }
     try {
       const job = await timeWenliStage(timing, "job_lookup", () => this.jobs.get(sourceMessageId));
       if (!job || job.type !== "mention" || job.requesterId !== accountId) {
-        throw new AppError("WENLI_SOURCE_INVALID", "问理触发消息无效");
+        throw new AppError("WENLI_SOURCE_INVALID", "小Q触发消息无效");
       }
       // 已经回复过的任务不再生成，但仍告知调用方可以显示结果。
       if (job.status === "succeeded") {
@@ -112,7 +112,7 @@ export class WenliService {
     return { processed };
   }
 
-  /** 问理回复推给双方；推送失败不影响已经落库的回复。 */
+  /** 小Q回复推给双方；推送失败不影响已经落库的回复。 */
   private async pushReply(message: MessageRecord | null | undefined): Promise<void> {
     if (!this.push || !message) return;
     const alert = message.type === "image" ? "[图片]" : message.body;

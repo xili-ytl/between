@@ -27,10 +27,10 @@ describe("WenliService", () => {
     expect(result.messageId).toBe(deterministicWenliReplyId(source.id));
    expect(generator.generate).toHaveBeenCalledTimes(1);
    expect(push.pushWenli).toHaveBeenCalledTimes(1);
-    expect(push.pushWenli).toHaveBeenCalledWith("问理的回复", deterministicWenliReplyId(source.id), T0);
+    expect(push.pushWenli).toHaveBeenCalledWith("小Q的回复", deterministicWenliReplyId(source.id), T0);
     await expect(messages.get(deterministicWenliReplyId(source.id))).resolves.toMatchObject({
       senderId: "wenli",
-      body: "问理的回复",
+      body: "小Q的回复",
       sourceMessageId: source.id
     });
   });
@@ -43,8 +43,8 @@ describe("WenliService", () => {
     const sink = { record: (event: WenliTimingEvent) => events.push(event) };
     const trigger = new WenliTriggerService(jobs, messages, () => new Date(T0), sink, () => (tick += 3));
     const source = await new ChatService(messages, () => new Date(T0), trigger)
-      .send("1001", "timing-service", "@问理 记录一下阶段");
-    const generator = generatorReturning("问理的回复");
+      .send("1001", "timing-service", "@小Q 记录一下阶段");
+    const generator = generatorReturning("小Q的回复");
     const service = new WenliService(jobs, new WenliJobWorker({
       store: jobs,
       generator,
@@ -104,7 +104,7 @@ describe("WenliService", () => {
     });
 
     await expect(service.sweep(2)).resolves.toEqual({ processed: 1 });
-    await expect(messages.get(deterministicWenliReplyId(due.id))).resolves.toMatchObject({ body: "问理的回复" });
+    await expect(messages.get(deterministicWenliReplyId(due.id))).resolves.toMatchObject({ body: "小Q的回复" });
     await expect(messages.get(deterministicWenliReplyId(future.id))).resolves.toBeNull();
     expect(push.pushWenli).toHaveBeenCalledTimes(1);
   });
@@ -154,7 +154,7 @@ describe("WenliService", () => {
     ]) as WenliService;
 
     const source = await new ChatService(messages, () => new Date(T0), trigger)
-      .send("1001", "pending-sweep", "@问理 稍后回复");
+      .send("1001", "pending-sweep", "@小Q 稍后回复");
 
     await expect(messages.getPendingMention(source.id)).resolves.toEqual(source);
     await expect(service.sweep(2)).resolves.toEqual({ processed: 1 });
@@ -193,7 +193,7 @@ describe("WenliService", () => {
     expect(acknowledge.mock.calls.map(([id]) => id)).toEqual([...badIds, goodId]);
     expect(await messages.pendingMentionIds(null, 200)).toEqual([]);
     for (const id of badIds) {
-      await expect(messages.get(id)).resolves.toMatchObject({ id, body: "@问理 在吗" });
+      await expect(messages.get(id)).resolves.toMatchObject({ id, body: "@小Q 在吗" });
     }
   });
 
@@ -212,13 +212,13 @@ describe("WenliService", () => {
     await seed(store, messages, source);
 
     await expect(service.kick("1001", source.id)).resolves.toMatchObject({ processed: true });
-    await expect(messages.get(deterministicWenliReplyId(source.id))).resolves.toMatchObject({ body: "问理的回复" });
+    await expect(messages.get(deterministicWenliReplyId(source.id))).resolves.toMatchObject({ body: "小Q的回复" });
   });
 
   it("works without a push service configured", async () => {
     const messages = new MemoryMessageStore();
     const store = new MemoryWenliJobExecutionStore(messages);
-    const generator = generatorReturning("问理的回复");
+    const generator = generatorReturning("小Q的回复");
     const service = new WenliService(store, workerWith(store, generator), undefined, () => new Date(T0));
     const source = mention("1001_nopush");
     await messages.appendIfAbsent(source);
@@ -254,7 +254,7 @@ function harness(): {
 } {
   const messages = new MemoryMessageStore();
   const store = new MemoryWenliJobExecutionStore(messages);
-  const generator = generatorReturning("问理的回复");
+  const generator = generatorReturning("小Q的回复");
   const push = { pushWenli: vi.fn(async () => undefined) };
   const service = new WenliService(store, workerWith(store, generator), push, () => new Date(T0));
   return { service, messages, store, push, generator };
@@ -301,7 +301,7 @@ function mention(id: string, overrides: Partial<MessageRecord> = {}): MessageRec
     senderId,
     recipientId: senderId === "1001" ? "1002" : "1001",
     clientMessageId: id.slice(5),
-    body: "@问理 在吗",
+    body: "@小Q 在吗",
     createdAt: T0,
     ...overrides
   };

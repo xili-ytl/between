@@ -7,7 +7,7 @@
 | android/app/src/androidTest | 需要设备的迁移/交互测试 |
 | android/scripts | 使用真实 Room 查询的 SQLite 隔离验收 |
 | backend/src/api | action/payload 路由 |
-| backend/src/services | 业务与问理执行 |
+| backend/src/services | 业务与小Q执行 |
 | backend/src/ports | 存储、模型与图片接口 |
 | backend/src/adapters | CloudBase、模型 HTTP 和内存测试实现 |
 | backend/src/domain | 纯规则、结构校验、角色编译与上下文选择 |
@@ -25,11 +25,11 @@ API 真源为 [api-router.ts](../backend/src/api/api-router.ts) 和 [contracts.t
 
 普通应用升级不清聊天缓存。数据库结构兼容由 Room 的非破坏迁移负责；ChatRepository.initialSync 合并服务器分页，断网时保留已有历史及接收游标。两项仓库回归验证重建应用后离线保留、联网合并旧缓存；这不是实际 APK 升级或 Room 迁移的设备验收，也不能恢复旧版本已经清掉的缓存。
 
-## 问理的数据流
+## 小Q的数据流
 
 ~~~mermaid
 flowchart TD
-    A["Android：提交 @问理 消息"] --> B["服务端鉴权与稳定消息 ID"]
+    A["Android：提交 @小Q 消息"] --> B["服务端鉴权与稳定消息 ID"]
     B --> C["消息与 mention outbox"]
     C --> D["事务领取任务租约"]
     D --> E["核对原消息发送者与请求者"]

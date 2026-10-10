@@ -348,7 +348,7 @@ function mention(id: string, overrides: Partial<MessageRecord> = {}): MessageRec
     senderId,
     recipientId: senderId === "1001" ? "1002" : "1001",
     clientMessageId,
-    body: "@问理 在吗",
+    body: "@小Q 在吗",
     createdAt: "2026-08-30T23:59:00.000Z",
     ...overrides
   };

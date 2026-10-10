@@ -53,8 +53,8 @@ export async function main(dependencies: BackupDependencies = DEFAULT_DEPENDENCI
     dependencies.output(
       `加密备份已生成：${file}\n账号 ${data.users.length}，关系 ${data.relationships.length}，` +
       `动态 ${data.moments.length}，点赞 ${data.momentLikes.length}，评论 ${data.momentComments.length}，` +
-      `消息 ${data.messages.length}，问理任务 ${data.wenliAgentJobs.length}，` +
-      `问理记忆 ${data.wenliMemories.length}。\n`
+      `消息 ${data.messages.length}，小Q任务 ${data.wenliAgentJobs.length}，` +
+      `小Q记忆 ${data.wenliMemories.length}。\n`
     );
   } finally {
     delete dependencies.environment.BACKUP_PASSPHRASE;

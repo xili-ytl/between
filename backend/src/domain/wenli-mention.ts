@@ -2,8 +2,8 @@ import type { AccountId, MessageRecord } from "./contracts.js";
 import { IMAGE_MESSAGE_PLACEHOLDER } from "./contracts.js";
 
 // The mention may be inserted at a middle cursor position, but both sides
-// must still be explicit token boundaries. `@问理你好` is not a mention.
-const WENLI_MENTION_TOKEN = /(?:^|[\s，,：:])@问理(?=$|[\s，,：:])/u;
+// must still be explicit token boundaries. `@小Q你好` is not a mention.
+const WENLI_MENTION_TOKEN = /(?:^|[\s，,：:])@小Q(?=$|[\s，,：:])/u;
 
 export function isWenliMention(body: string): boolean {
   return WENLI_MENTION_TOKEN.test(body);

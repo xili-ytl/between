@@ -26,7 +26,7 @@ fun WenliAvatar(size: Dp, modifier: Modifier = Modifier) {
     ) {
         Image(
             painter = painterResource(R.drawable.wenli_avatar),
-            contentDescription = "问理的头像",
+            contentDescription = "小Q的头像",
         )
     }
 }

@@ -47,7 +47,7 @@ describe("ChatService", () => {
     };
     const observedService = new ChatService(messages, () => new Date(now), observer);
 
-    const sent = await observedService.send("1001", "observed-1", "@问理 在吗");
+    const sent = await observedService.send("1001", "observed-1", "@小Q 在吗");
 
     expect(observer.afterHumanMessage).toHaveBeenCalledOnce();
     expect(observer.afterHumanMessage).toHaveBeenCalledWith(sent);
@@ -61,7 +61,7 @@ describe("ChatService", () => {
     };
     const observedService = new ChatService(messages, () => new Date(now), observer);
 
-    const sent = await observedService.send("1001", "observed-2", "@问理 帮帮我");
+    const sent = await observedService.send("1001", "observed-2", "@小Q 帮帮我");
 
     expect(await messages.get(sent.id)).toEqual(sent);
     expect(observer.afterHumanMessage).toHaveBeenCalledOnce();
@@ -79,7 +79,7 @@ describe("ChatService", () => {
   });
 
   it("writes one deterministic Wenli reply linked to the human trigger", async () => {
-    const source = await service.send("1001", "ask-1", "@问理 在吗");
+    const source = await service.send("1001", "ask-1", "@小Q 在吗");
     const first = await service.sendAsWenli("1001", source.id, "在呢，怎么啦？");
     now = new Date("2026-08-30T01:00:00.000Z");
     const retried = await service.sendAsWenli("1001", source.id, "重试不能覆盖");
@@ -110,7 +110,7 @@ describe("ChatService", () => {
   });
 
   it("rejects missing, mismatched, Wenli-origin, blank, and oversized replies", async () => {
-    const source = await service.send("1001", "ask-2", "@问理 在吗");
+    const source = await service.send("1001", "ask-2", "@小Q 在吗");
     await expect(service.sendAsWenli("1002", source.id, "不匹配"))
       .rejects.toMatchObject({ code: "WENLI_SOURCE_INVALID" });
     await expect(service.sendAsWenli("1001", "missing", "不存在"))
@@ -121,7 +121,7 @@ describe("ChatService", () => {
       .rejects.toMatchObject({ code: "WENLI_REPLY_INVALID" });
 
     const reply = await service.sendAsWenli("1001", source.id, "第一次回复");
-    await expect(service.sendAsWenli("1001", reply.id, "不能回复问理自己"))
+    await expect(service.sendAsWenli("1001", reply.id, "不能回复小Q自己"))
       .rejects.toMatchObject({ code: "WENLI_SOURCE_INVALID" });
   });
 
@@ -185,14 +185,14 @@ describe("ChatService", () => {
   });
 
   it("accepts captioned image messages and rejects bad mime or a foreign file id", async () => {
-    const captioned = await service.send("1001", "img-2", "@问理 看看这张图", undefined, {
+    const captioned = await service.send("1001", "img-2", "@小Q 看看这张图", undefined, {
       imageFileId: "cloud://env-bucket/chat-images/1001_img-2.jpg",
       imageMimeType: "image/jpeg"
     });
     expect(captioned).toMatchObject({
       id: "1001_img-2",
       type: "image",
-      body: "@问理 看看这张图",
+      body: "@小Q 看看这张图",
       imageFileId: "cloud://env-bucket/chat-images/1001_img-2.jpg",
       imageMimeType: "image/jpeg"
     });
@@ -209,7 +209,7 @@ describe("ChatService", () => {
   });
 
   it("rejects an image caption longer than 2000 characters", async () => {
-    await expect(service.send("1001", "img-6", "@问理 " + "喵".repeat(2000), undefined, {
+    await expect(service.send("1001", "img-6", "@小Q " + "喵".repeat(2000), undefined, {
       imageFileId: "cloud://env-bucket/chat-images/1001_img-6.jpg",
       imageMimeType: "image/jpeg"
     })).rejects.toMatchObject({ code: "IMAGE_INVALID" });

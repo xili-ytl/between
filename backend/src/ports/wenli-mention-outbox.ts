@@ -2,7 +2,7 @@ import type { MessageRecord } from "../domain/contracts.js";
 
 /**
  * The durable marker points at a message document that was read successfully
- * but can never be a valid human @问理 source. Callers may clear only this
+ * but can never be a valid human @小Q source. Callers may clear only this
  * explicitly classified error; transport and persistence failures remain
  * retryable.
  */

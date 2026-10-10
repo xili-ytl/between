@@ -101,10 +101,10 @@ export function createApiRouter(cloud: CloudPersistence, app?: CloudBase): ApiRo
 }
 
 /**
- * 把「主人 @了问理」变成一条排队任务。
+ * 把「主人 @了小Q」变成一条排队任务。
  *
  * **与是否由云端执行无关**：任务创建必须始终开启，否则一旦把执行交给别处
- * （例如本机 runner 跑 Opus），消息就再也不会被排队，问理完全不回话。
+ * （例如本机 runner 跑 Opus），消息就再也不会被排队，小Q完全不回话。
  * 之前这里和 WENLI_MOBILE_SHADOW_ENABLED 绑在一起，关闭云端执行时连带停掉了排队，
  * 已改为始终创建。
  */
@@ -128,7 +128,7 @@ export interface WenliServiceOptions {
 }
 
 /**
- * 问理执行路径的接线（kick/sweep → 租约 worker → 模型）。
+ * 小Q执行路径的接线（kick/sweep → 租约 worker → 模型）。
  * 影子开关默认关闭；即使打开，缺少 CloudBase app 或服务端模型密钥也不启用，
  * 保证未配置时 `wenli.kick`/`wenli.sweep` 返回 WENLI_UNAVAILABLE 而不是半开状态。
  */
@@ -182,7 +182,7 @@ export function createWenliServiceFromEnv(
   );
 }
 
-/** 问理提示词里要用的双方昵称；读取失败时回退到固定默认名。 */
+/** 小Q提示词里要用的双方昵称；读取失败时回退到固定默认名。 */
 function wenliProfileNames(cloud: CloudPersistence): () => Promise<Record<AccountId, string>> {
   return async () => {
     try {

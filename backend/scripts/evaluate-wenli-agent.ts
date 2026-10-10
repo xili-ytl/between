@@ -102,40 +102,40 @@ async function save() {
 }
 try {
   for (const [speaker, name] of [["1002", "示例甲"], ["1001", "示例乙"]] as const) {
-    await ask(session(), `identity-${speaker}`, speaker, "@问理 我是谁？", r => ({ speaker: r.includes(name), notSelf: !/你是问理/u.test(r) }));
+    await ask(session(), `identity-${speaker}`, speaker, "@小Q 我是谁？", r => ({ speaker: r.includes(name), notSelf: !/你是小Q/u.test(r) }));
   }
-  await ask(session(), "penguin-cute", "1002", "@问理 你是企鹅为什么还喵？", r => ({ playful: /卖萌|可爱|逗|学猫|撒娇/u.test(r) }));
+  await ask(session(), "penguin-cute", "1002", "@小Q 你是企鹅为什么还喵？", r => ({ playful: /卖萌|可爱|逗|学猫|撒娇/u.test(r) }));
   const irony = session();
   await append(irony, "1002", "排队买栗子呢，闻着好香，马上到我了。");
-  await ask(irony, "irony", "1002", "@问理 真棒，排了半小时的队，轮到我刚好卖完。", r => ({ understands: /倒霉|白等|白排|失望|气|难受|心疼|呜|哭|哎|唉|惨|扑空|没吃上/u.test(r), noCongrats: !/恭喜|太棒了/u.test(r) }));
+  await ask(irony, "irony", "1002", "@小Q 真棒，排了半小时的队，轮到我刚好卖完。", r => ({ understands: /倒霉|白等|白排|失望|气|难受|心疼|呜|哭|哎|唉|惨|扑空|没吃上/u.test(r), noCongrats: !/恭喜|太棒了/u.test(r) }));
   const tutorial = session();
-  await append(tutorial, "1002", "@问理 教我矩阵快速幂，写 Markdown，含代码和斐波那契例子，演示算出 F(10)。");
+  await append(tutorial, "1002", "@小Q 教我矩阵快速幂，写 Markdown，含代码和斐波那契例子，演示算出 F(10)。");
   await append(tutorial, "wenli", "好呀，我把原理和模板整理成 Markdown 给你。");
-  await ask(tutorial, "pending-delivery", "1002", "@问理 给我呀", r => ({ deliverNow: r.length > 200 && /```/u.test(r) && /矩阵/u.test(r), noAmnesia: !/给你什么|给我什么/u.test(r) }));
+  await ask(tutorial, "pending-delivery", "1002", "@小Q 给我呀", r => ({ deliverNow: r.length > 200 && /```/u.test(r) && /矩阵/u.test(r), noAmnesia: !/给你什么|给我什么/u.test(r) }));
   const posts = session();
   const moment = { id: "1002_eval_shapes", authorId: "1002" as const, clientMomentId: "eval_shapes", body: "今天画了个测试书签", visibility: "PARTNER" as const, deleting: false,
     createdAt: new Date(tick - 60_000).toISOString(), imageFileId: "cloud://synthetic/moments-images/1002_eval_shapes.png", imageMimeType: "image/png" as const };
   await posts.moments.appendMomentIfAbsent(moment);
   await posts.moments.appendCommentToVisibleMomentIfAbsent({ id: "1001_eval_comment", authorId: "1001", clientCommentId: "eval_comment", momentId: moment.id,
     body: "左边那个像小太阳", createdAt: new Date(tick).toISOString() });
-  await ask(posts, "moment-image", "1002", "@问理 朋友圈里我画的测试书签，图片里左右分别是什么？", r => ({ realImage: /红/u.test(r) && /蓝/u.test(r) && /圆/u.test(r) && /方/u.test(r) }));
-  await ask(posts, "moment-follow-up", "1002", "@问理 那她在下面评论了什么？", r => ({ commentSource: /小太阳/u.test(r) && /示例乙|她/u.test(r) }));
+  await ask(posts, "moment-image", "1002", "@小Q 朋友圈里我画的测试书签，图片里左右分别是什么？", r => ({ realImage: /红/u.test(r) && /蓝/u.test(r) && /圆/u.test(r) && /方/u.test(r) }));
+  await ask(posts, "moment-follow-up", "1002", "@小Q 那她在下面评论了什么？", r => ({ commentSource: /小太阳/u.test(r) && /示例乙|她/u.test(r) }));
   const memory = session(40);
-  await ask(memory, "remember", "1002", "@问理 记住，我喜欢蓝色杯子，好吗？", () => ({}));
+  await ask(memory, "remember", "1002", "@小Q 记住，我喜欢蓝色杯子，好吗？", () => ({}));
   if (report.at(-1)?.id === "remember") report.at(-1)!.checks.persisted = (await memory.memories.listForContext(200)).some(m => m.summary.includes("蓝色杯子"));
   await append(memory, "1001", "这是虚构测试的无关间隔消息。");
-  await ask(memory, "recall", "1002", "@问理 我喜欢什么颜色的杯子？", r => ({ recalled: /蓝/u.test(r) }));
-  await ask(memory, "do-not-forget", "1002", "@问理 请别忘记我的杯子偏好，先不用复述颜色。", () => ({}));
+  await ask(memory, "recall", "1002", "@小Q 我喜欢什么颜色的杯子？", r => ({ recalled: /蓝/u.test(r) }));
+  await ask(memory, "do-not-forget", "1002", "@小Q 请别忘记我的杯子偏好，先不用复述颜色。", () => ({}));
   if (report.at(-1)?.id === "do-not-forget") report.at(-1)!.checks.retained = (await memory.memories.listForContext(200)).some(m => m.summary.includes("蓝色杯子"));
-  await ask(memory, "correct", "1002", "@问理 纠正一下，我现在喜欢绿色杯子", () => ({}));
+  await ask(memory, "correct", "1002", "@小Q 纠正一下，我现在喜欢绿色杯子", () => ({}));
   await append(memory, "1001", "这是另一条无关间隔消息。");
-  await ask(memory, "recall-corrected", "1002", "@问理 我现在喜欢什么颜色的杯子？", r => ({ corrected: /绿/u.test(r) && !/蓝/u.test(r) }));
-  await ask(memory, "forget", "1002", "@问理 忘记我的杯子偏好", () => ({}));
+  await ask(memory, "recall-corrected", "1002", "@小Q 我现在喜欢什么颜色的杯子？", r => ({ corrected: /绿/u.test(r) && !/蓝/u.test(r) }));
+  await ask(memory, "forget", "1002", "@小Q 忘记我的杯子偏好", () => ({}));
   if (report.at(-1)?.id === "forget") report.at(-1)!.checks.forgotten = (await memory.memories.listForContext(200)).length === 0;
   await append(memory, "1001", "第三条无关间隔消息。");
-  await ask(memory, "recall-forgotten", "1002", "@问理 我喜欢什么颜色的杯子？", r => ({ notInvented: !/喜欢.{0,8}[蓝绿]|[蓝绿].{0,8}杯/u.test(r) }));
-  await ask(session(), "web-capability", "1002", "@问理 你能联网吗？", r => ({ capability: /能|可以/u.test(r) }));
-  await ask(session(), "public-search", "1002", "@问理 搜索小米 MiMo V2.6 的官方发布页，给我一条来源就好。", r => ({ verifiedSource: /https:\/\//u.test(r) }));
+  await ask(memory, "recall-forgotten", "1002", "@小Q 我喜欢什么颜色的杯子？", r => ({ notInvented: !/喜欢.{0,8}[蓝绿]|[蓝绿].{0,8}杯/u.test(r) }));
+  await ask(session(), "web-capability", "1002", "@小Q 你能联网吗？", r => ({ capability: /能|可以/u.test(r) }));
+  await ask(session(), "public-search", "1002", "@小Q 搜索小米 MiMo V2.6 的官方发布页，给我一条来源就好。", r => ({ verifiedSource: /https:\/\//u.test(r) }));
 } finally { await save(); }
 const failedChecks = report.filter(item => Object.values(item.checks).some(value => !value)).map(item => item.id);
 console.log(JSON.stringify({ resultPath, cases: report.length, failedChecks, spentUsd: budget.spentUsd }));

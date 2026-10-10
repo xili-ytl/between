@@ -10,7 +10,7 @@ const COMMENT_INTENT = /评论|留言/u;
 const MOMENT_INTENT = /朋友圈|(?:我们|你们|我|示例甲|示例乙)(?:刚|最近|之前)?发(?:过|的|了)?(?:那条|这条)?动态|(?:这条|那条|最新的|最近的)动态|动态(?:里|中|内容|照片)|那条(帖子|照片|图片)|发的(帖子|照片|图片)/u;
 const IMAGE_INTENT = /图|照片|图片|拍的|画面|看见|看到/iu;
 export function isMomentQuery(query: string): boolean { return MOMENT_INTENT.test(query); }
-const STOP_PAIRS = new Set(["问理", "主人", "我们", "你们", "他们", "什么", "怎么", "那个", "这条", "之前", "动态", "朋友", "友圈", "图片", "照片", "发的", "看到", "能看", "一下", "了吗", "里面", "请问"]);
+const STOP_PAIRS = new Set(["小Q", "主人", "我们", "你们", "他们", "什么", "怎么", "那个", "这条", "之前", "动态", "朋友", "友圈", "图片", "照片", "发的", "看到", "能看", "一下", "了吗", "里面", "请问"]);
 
 export interface WenliMomentContext {
   status: "not_requested" | "found" | "empty" | "unavailable";
@@ -87,7 +87,7 @@ export class StoreWenliMomentContextProvider implements WenliMomentContextProvid
 export function resolveWenliMomentQuery(source: MessageRecord, history: readonly MessageRecord[], quote: MessageRecord | null): string {
   const query = source.body;
   if (isMomentQuery(query)) return query;
-  const cleaned = query.replace(/@问理/gu, "").trim();
+  const cleaned = query.replace(/@小Q/gu, "").trim();
   if ([...cleaned].length > 100 || !/^(那|这|它|她|他|里面|上面|后来|然后|再|继续|详细|还有|能看清|是什么颜色)/u.test(cleaned)) return query;
   if (/换个话题|不说这个|先不聊|联网|搜一下|查一下|新闻|教程|代码|算法/u.test(cleaned)) return query;
   if (quote && quote.senderId !== "wenli" && isMomentQuery(quote.body)) return `${quote.body}\n追问：${query}`;
@@ -97,7 +97,7 @@ export function resolveWenliMomentQuery(source: MessageRecord, history: readonly
     const age = now - Date.parse(message.createdAt);
     if (!Number.isFinite(age) || age < 0 || age > FOLLOW_UP_MAX_AGE_MS) return query;
     if (isMomentQuery(message.body)) return `${message.body}\n追问：${query}`;
-    if (!/^(那|这|它|她|他|里面|上面|后来|然后|再|继续|详细|还有)/u.test(message.body.replace(/@问理/gu, "").trim())) return query;
+    if (!/^(那|这|它|她|他|里面|上面|后来|然后|再|继续|详细|还有)/u.test(message.body.replace(/@小Q/gu, "").trim())) return query;
   }
   return query;
 }
@@ -109,7 +109,7 @@ export function isSharedMoment(post: MomentRecord): boolean {
 }
 
 function termsFor(query: string): string[] {
-  const cleaned = query.replace(/@问理|朋友圈|动态/gu, "").toLowerCase();
+  const cleaned = query.replace(/@小Q|朋友圈|动态/gu, "").toLowerCase();
   const result = new Set<string>();
   for (const word of cleaned.match(/[a-z0-9]{3,}|[\p{Script=Han}]+/gu) ?? []) {
     if (/^[a-z0-9]+$/u.test(word)) result.add(word);

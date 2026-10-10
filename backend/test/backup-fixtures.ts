@@ -5,7 +5,7 @@ import { buildWenliReply } from "../src/domain/wenli-reply.js";
 export function completedWenliBackup(): BackupData {
   const data = validBackupData();
   const source = { id: "1001_complete", relationshipId: "couple" as const, senderId: "1001" as const,
-    recipientId: "1002" as const, clientMessageId: "complete", body: "@问理 你好", createdAt: "2026-08-07T00:00:00.000Z" };
+    recipientId: "1002" as const, clientMessageId: "complete", body: "@小Q 你好", createdAt: "2026-08-07T00:00:00.000Z" };
   const reply = buildWenliReply("1001", source, "我在呢", "2026-08-07T00:00:01.000Z");
   data.messages.push({ id: source.id, data: { ...source } }, { id: reply.id, data: { ...reply } });
   data.wenliAgentJobs.push({ id: source.id, data: { id: source.id, type: "mention", requesterId: "1001",

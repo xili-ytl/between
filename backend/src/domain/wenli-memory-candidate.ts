@@ -10,7 +10,7 @@ export function buildSourcedMemory(value: unknown, source: MessageRecord): Wenli
   if (typeof quote !== "string" || [...quote].length < 3 || [...quote].length > 300 || !source.body.includes(quote)) return null;
   // Remove only the mention token; preserve the surrounding human wording
   // when the token was inserted in the middle of a draft.
-  const statement = source.body.replace(/(^|[\s，,：:])@问理(?=$|[\s，,：:])/gu, "$1").trim();
+  const statement = source.body.replace(/(^|[\s，,：:])@小Q(?=$|[\s，,：:])/gu, "$1").trim();
   if ([...statement].length > 512) return null;
   const asserted = /记住|记一下|记着|记忆/u.test(statement)
     ? statement.replace(/[,，。]\s*(?:好吗|可以吗|能记住吗|能记一下吗|记住了吗)[?？]+\s*$/u, "")
@@ -42,7 +42,7 @@ export function buildSourcedMemory(value: unknown, source: MessageRecord): Wenli
 
 /** An explicit, unambiguous owner command does not depend on the model remembering to emit JSON. */
 export function resolveWenliMemoryMutation(value: unknown, source: MessageRecord, records: readonly WenliMemoryRecord[]): WenliMemoryRecord | null {
-  const statement = source.body.replace(/@问理/gu, "").trim();
+  const statement = source.body.replace(/@小Q/gu, "").trim();
   if (source.senderId !== "1002" && source.senderId !== "1001") return null;
   const target = forgetTarget(statement, source.senderId);
   if (target === null) return buildSourcedMemory(value, source);
@@ -70,7 +70,7 @@ function forgetTarget(statement: string, senderId: "1002" | "1001"): string | nu
 
 function mutationTerms(text: string): Set<string> {
   const terms = new Set<string>();
-  const content = text.toLowerCase().replace(/问理|主人|示例甲|示例乙|记住|记一下|忘记|别再记|不要再记|删除|纠正一下|纠正|我的|我现在|我喜欢|我不喜欢|喜欢|关于|现在|那条|这条|偏好|记忆|好吗|可以吗/gu, " ");
+  const content = text.toLowerCase().replace(/小Q|主人|示例甲|示例乙|记住|记一下|忘记|别再记|不要再记|删除|纠正一下|纠正|我的|我现在|我喜欢|我不喜欢|喜欢|关于|现在|那条|这条|偏好|记忆|好吗|可以吗/gu, " ");
   for (const word of content.match(/[a-z0-9]{3,}|[\p{Script=Han}]{2,}/gu) ?? []) {
     if (/^[a-z0-9]+$/u.test(word)) terms.add(word);
     else for (let index = 0; index < word.length - 1; index++) terms.add(word.slice(index, index + 2));

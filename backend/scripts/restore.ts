@@ -33,7 +33,7 @@ export async function main(dependencies: RestoreDependencies = DEFAULT_DEPENDENC
       `备份校验通过：账号 ${data.users.length}，关系 ${data.relationships.length}，` +
       `动态 ${data.moments.length}，点赞 ${data.momentLikes.length}，` +
       `评论 ${data.momentComments.length}，消息 ${data.messages.length}，` +
-      `问理任务 ${data.wenliAgentJobs.length}，问理记忆 ${data.wenliMemories.length}。\n`
+      `小Q任务 ${data.wenliAgentJobs.length}，小Q记忆 ${data.wenliMemories.length}。\n`
     );
 
     let inserted = 0;

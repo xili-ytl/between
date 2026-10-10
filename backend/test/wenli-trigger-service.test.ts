@@ -23,22 +23,22 @@ function humanMessage(body: string, overrides: Partial<MessageRecord> = {}): Mes
 
 describe("isWenliMention", () => {
   it.each([
-    "@问理",
-    "  @问理 在吗",
-    "@问理：帮我看看",
-    "@问理, 你好",
-    "@问理，过来一下",
-    "@问理: hello",
-    "前文 @问理 后文"
+    "@小Q",
+    "  @小Q 在吗",
+    "@小Q：帮我看看",
+    "@小Q, 你好",
+    "@小Q，过来一下",
+    "@小Q: hello",
+    "前文 @小Q 后文"
   ])("accepts an explicit mention token: %s", (body) => {
     expect(isWenliMention(body)).toBe(true);
   });
 
   it.each([
-    "问理 在吗",
-    "今天@问理在吗",
-    "@问理啊",
-    "前文 @问理你好",
+    "小Q 在吗",
+    "今天@小Q在吗",
+    "@小Q啊",
+    "前文 @小Q你好",
     IMAGE_MESSAGE_PLACEHOLDER
   ])("rejects text that is not an explicit leading mention: %s", (body) => {
     expect(isWenliMention(body)).toBe(false);
@@ -48,7 +48,7 @@ describe("isWenliMention", () => {
     const jobs = new MemoryWenliAgentJobStore();
     const messages = new MemoryMessageStore();
     const service = new WenliTriggerService(jobs, messages, () => new Date(NOW));
-    const source = await messages.appendIfAbsent(humanMessage("前文 @问理 后文", {
+    const source = await messages.appendIfAbsent(humanMessage("前文 @小Q 后文", {
       id: "1001_middle-1",
       clientMessageId: "middle-1"
     }), { captureWenliMention: true });
@@ -59,7 +59,7 @@ describe("isWenliMention", () => {
       requesterId: "1001",
       status: "pending"
     });
-    await expect(messages.get(source.id)).resolves.toMatchObject({ body: "前文 @问理 后文" });
+    await expect(messages.get(source.id)).resolves.toMatchObject({ body: "前文 @小Q 后文" });
   });
 });
 
@@ -68,7 +68,7 @@ describe("WenliTriggerService", () => {
     const jobs = new MemoryWenliAgentJobStore();
     const messages = new MemoryMessageStore();
     const service = new WenliTriggerService(jobs, messages, () => new Date(NOW));
-    const message = await messages.appendIfAbsent(humanMessage("@问理 在吗"), { captureWenliMention: true });
+    const message = await messages.appendIfAbsent(humanMessage("@小Q 在吗"), { captureWenliMention: true });
 
     const first = await service.afterHumanMessage(message);
     const retried = await service.afterHumanMessage(message);
@@ -101,7 +101,7 @@ describe("WenliTriggerService", () => {
       imageFileId: "cloud://env/chat-images/1001_image-1.jpg",
       imageMimeType: "image/jpeg"
     }), { captureWenliMention: true }))).resolves.toBeNull();
-    await expect(service.afterHumanMessage(await messages.appendIfAbsent(humanMessage("@问理 我是问理", {
+    await expect(service.afterHumanMessage(await messages.appendIfAbsent(humanMessage("@小Q 我是小Q", {
       id: "wenli_reply-1",
       senderId: "wenli",
       clientMessageId: "reply-1",
@@ -114,12 +114,12 @@ describe("WenliTriggerService", () => {
     expect(await jobs.get("wenli_reply-1")).toBeNull();
   });
 
-  it("materializes a captioned image @问理 mention and ignores the placeholder", async () => {
+  it("materializes a captioned image @小Q mention and ignores the placeholder", async () => {
     const jobs = new MemoryWenliAgentJobStore();
     const messages = new MemoryMessageStore();
     const service = new WenliTriggerService(jobs, messages, () => new Date(NOW));
 
-    const captioned = await messages.appendIfAbsent(humanMessage("@问理 看看这张图", {
+    const captioned = await messages.appendIfAbsent(humanMessage("@小Q 看看这张图", {
       id: "1001_image-mention",
       clientMessageId: "image-mention",
       type: "image",

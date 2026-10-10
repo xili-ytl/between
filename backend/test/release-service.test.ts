@@ -16,7 +16,7 @@ const valid: ReleaseManifest = {
 const validPet: PetReleaseManifest = {
   version: "1.0.1",
   versionCode: 101,
-  notes: ["基于成熟 Q 宠项目重构，并接入问理 AI"],
+  notes: ["基于成熟 Q 宠项目重构，并接入小Q AI"],
   artifactKey: "releases/pet/between-qpet-1.0.1.exe",
   size: 123,
   sha256: "b".repeat(64),

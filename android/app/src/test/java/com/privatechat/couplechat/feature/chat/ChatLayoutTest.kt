@@ -121,41 +121,41 @@ class ChatLayoutTest {
         composer.acceptExternal(insertion.text, selection = TextRange(insertion.cursor))
 
         // 光标停在尾部空格之后，也不能被当成用户正文编辑。
-        assertEquals("@问理 ", composer.value.value.text)
+        assertEquals("@小Q ", composer.value.value.text)
         assertEquals(TextRange(4), composer.value.value.selection)
-        assertNull(composer.edit(TextFieldValue("@问理 ", selection = TextRange(4))))
+        assertNull(composer.edit(TextFieldValue("@小Q ", selection = TextRange(4))))
     }
 
     @Test
     fun longPressInsertionHandlesEmptyMiddleSelectionAndCompositionState() {
         val empty = insertWenliMentionValue(TextFieldValue(""))
-        assertEquals("@问理 ", empty.text)
+        assertEquals("@小Q ", empty.text)
         assertEquals(TextRange(4), empty.selection)
 
         val middle = insertWenliMentionValue(TextFieldValue("你好世界", selection = TextRange(2)))
-        assertEquals("你好 @问理 世界", middle.text)
+        assertEquals("你好 @小Q 世界", middle.text)
         assertEquals(TextRange(7), middle.selection)
 
         val selected = insertWenliMentionValue(TextFieldValue("你好世界", selection = TextRange(1, 3)))
-        assertEquals("你 @问理 界", selected.text)
+        assertEquals("你 @小Q 界", selected.text)
         assertEquals(TextRange(6), selected.selection)
 
         val composing = insertWenliMentionValue(
             TextFieldValue("da", selection = TextRange(2), composition = TextRange(0, 2)),
         )
-        assertEquals("da @问理 ", composing.text)
+        assertEquals("da @小Q ", composing.text)
         assertEquals(TextRange(7), composing.selection)
         assertEquals(null, composing.composition)
     }
 
     @Test
     fun longPressInsertionDoesNotDuplicateAnExistingMentionOrClearDraftState() {
-        val current = TextFieldValue("保留 @问理 草稿", selection = TextRange(2))
+        val current = TextFieldValue("保留 @小Q 草稿", selection = TextRange(2))
 
         val repeated = insertWenliMentionValue(current)
 
         assertEquals(current, repeated)
-        assertEquals("保留 @问理 草稿", repeated.text)
+        assertEquals("保留 @小Q 草稿", repeated.text)
         assertTrue(isWenliMentionBody(repeated.text))
     }
 }

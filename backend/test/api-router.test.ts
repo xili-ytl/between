@@ -885,7 +885,7 @@ describe("ApiRouter", () => {
   });
 
   it("rejects Wenli actions without a service or with an invalid session, and keeps them out of the pet allowlist", async () => {
-    // 未配置问理服务时：先按会话鉴权，再在 switch 里给出明确的不可用错误。
+    // 未配置小Q服务时：先按会话鉴权，再在 switch 里给出明确的不可用错误。
     await expect(router.handle({
       action: "wenli.kick",
       sessionToken: "bogus",
@@ -903,7 +903,7 @@ describe("ApiRouter", () => {
       payload: { sourceMessageId: "1001_m-1" }
     }, "127.0.0.1")).resolves.toEqual({
       ok: false,
-      error: { code: "WENLI_UNAVAILABLE", message: "问理暂时不可用" }
+      error: { code: "WENLI_UNAVAILABLE", message: "小Q暂时不可用" }
     });
     await expect(router.handle({
       action: "wenli.sweep",
@@ -911,7 +911,7 @@ describe("ApiRouter", () => {
       payload: { limit: 2 }
     }, "127.0.0.1")).resolves.toEqual({
       ok: false,
-      error: { code: "WENLI_UNAVAILABLE", message: "问理暂时不可用" }
+      error: { code: "WENLI_UNAVAILABLE", message: "小Q暂时不可用" }
     });
 
     // 宠物会话不在白名单里，直接 PET_READONLY。
@@ -936,7 +936,7 @@ describe("ApiRouter", () => {
       senderId: "1001",
       recipientId: "1002",
       clientMessageId: "mention",
-      body: "@问理 在吗",
+      body: "@小Q 在吗",
       createdAt: "2026-08-06T00:00:00.000Z"
     };
     await messages.appendIfAbsent(source);
@@ -951,7 +951,7 @@ describe("ApiRouter", () => {
       createdAt: "2026-08-06T00:00:00.000Z",
       updatedAt: "2026-08-06T00:00:00.000Z"
     });
-    const generator = { generate: async () => ({ reply: "问理的回答", memoryUpdate: null }) };
+    const generator = { generate: async () => ({ reply: "小Q的回答", memoryUpdate: null }) };
     const wenli = new WenliService(
       jobs,
       new WenliJobWorker({ store: jobs, generator, clock: () => new Date("2026-08-06T00:00:00.000Z") }),
@@ -987,7 +987,7 @@ describe("ApiRouter", () => {
       ok: true,
       data: { processed: true, messageId: deterministicWenliReplyId(source.id) }
     });
-    await expect(messages.get(deterministicWenliReplyId(source.id))).resolves.toMatchObject({ body: "问理的回答" });
+    await expect(messages.get(deterministicWenliReplyId(source.id))).resolves.toMatchObject({ body: "小Q的回答" });
 
     await expect(wenliRouter.handle({
       action: "wenli.sweep",
