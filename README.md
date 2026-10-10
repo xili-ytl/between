@@ -76,7 +76,9 @@ Android 需要 JDK 17、Android SDK 35 / Build Tools 35.0.0；Gradle Wrapper 固
 
 ## 验证状态与当前限制
 
-2026-10-10 在独立源码候选中重新 npm ci，随后通过后端 842 项测试、实际 SQLite 4 项测试、类型检查、角色同步和函数构建。2026-10-09 的 Android JVM 328 项测试、Debug 构建及 instrumentation 编译通过，此后 Android 源码未再改变；lint 为 0 errors、12 warnings。设备测试没有运行，也没有实际 GitHub runner、隔离双设备或全新云环境的端到端验收；本机通过不代表这些已通过。
+2026-10-10 的 [GitHub Actions 验收](https://github.com/xili-ytl/between/actions/runs/38058825452) 在提交 `3e85999` 上双端通过：后端独立 npm ci、842 项测试、实际 SQLite 4 项测试、类型检查、角色同步和函数构建；Android 单测、lint 与 Debug 构建。CI 显式安装 Android SDK，优先使用官方 Maven 仓库。
+
+本地 Android 验证为 2026-10-09 的 JVM 328 项测试、Debug 构建和 instrumentation 编译，lint 为 0 errors、12 warnings；该计数不是从 GitHub 测试报告读取的。设备测试、隔离双设备及全新云环境的端到端验收尚未运行，CI 通过不代表这些已通过。
 
 已修正普通升级清聊天缓存、每请求重复建集合、并发登录失败计数、旧会话分页状态污染及登录来源解析。仓库、入口及安装 SDK 的假传输回归已通过；Room 迁移、手机切换与真实云事务仍需隔离验收。首发前还需处理运行时依赖审计与可选升级默认状态，并在新环境验证集合、索引及部署流程。详见架构与安全文档。
 
