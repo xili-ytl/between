@@ -46,7 +46,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Install matching Android SDK components
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Set up Android SDK and matching components
+        uses: android-actions/setup-android@138b5fb1cf087fdb4c5f3c621466fe304d0cf2e3 # v4.0.3
+        with:
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
+          log-accepted-android-sdk-licenses: 'false'
       - run: bash ./gradlew testDebugUnitTest lintDebug assembleDebug --no-daemon --console=plain
         working-directory: android
