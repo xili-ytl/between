@@ -230,13 +230,16 @@ class ChatRepository(
     }
 
     override suspend fun loadOlder(): HistoryLoadResult {
+        val captured = requireSession()
         val previousLimit = visibleLimit.value
         val cachedBeforeFetch = local.count()
+        if (!isCurrent(captured)) return HistoryLoadResult(0, true)
         if (cachedBeforeFetch <= previousLimit && !cloudHistoryExhausted) {
-            fetchOlderPage()
+            fetchOlderPage(captured)
         }
 
         val available = local.count()
+        if (!isCurrent(captured)) return HistoryLoadResult(0, true)
         val nextLimit = previousLimit + PAGE_SIZE
         visibleLimit.value = nextLimit
         val previouslyVisible = minOf(cachedBeforeFetch, previousLimit)
@@ -505,8 +508,8 @@ class ChatRepository(
         }
     }
 
-    private suspend fun fetchOlderPage(): OlderFetchResult = olderFetchMutex.withLock {
-        val captured = requireSession()
+    private suspend fun fetchOlderPage(captured: Session = requireSession()): OlderFetchResult = olderFetchMutex.withLock {
+        if (!isCurrent(captured)) return@withLock OlderFetchResult(0, true)
         try {
             val cursor = local.oldest()?.cursor()
             if (!isCurrent(captured)) return@withLock OlderFetchResult(0, true)
@@ -522,7 +525,7 @@ class ChatRepository(
             }
         } catch (_: SessionInvalidException) {
             sessions.clearIfCurrent(captured.token)
-            cloudHistoryExhausted = true
+            // An authentication failure says nothing about the end of history.
             OlderFetchResult(inserted = 0, exhausted = true)
         } catch (error: CancellationException) {
             throw error

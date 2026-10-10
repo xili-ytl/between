@@ -12,16 +12,18 @@
 
 默认测试不登录真人、不写生产合成数据。模型评测与云端冒烟单独授权和预算；备份必须独立验证，真实明文不能做 fixture。漏洞复现用合成内容，不在公开日志泄露 token、聊天或图片 URL。安全联系入口和项目许可证会在正式公开前补齐。
 
-## 依赖审计：2026-10-09
+## 依赖审计：2026-10-10
 
-对独立候选的 package-lock.json 使用 npm 官方 registry 执行 npm audit --json，退出 1：10 个受影响的包条目，6 high、4 moderate、0 critical。随后单独执行 npm audit --omit=dev --json，退出 1：6 个运行时条目，4 high、2 moderate、0 critical。
+对独立候选的 package-lock.json 使用 npm 官方 registry 执行 npm audit --json 和 npm audit --omit=dev --json，两项均退出 1：各有 6 个受影响的包条目，4 high、2 moderate、0 critical。前一天的全树审计为 10 个条目；本轮补丁后不再有额外的开发依赖条目，运行时告警仍保留。
 
 这些计数包括受传递依赖影响的父包，不是独立漏洞数量。它们说明当前锁定依赖需要处理，不证明已发生攻击，也不证明所有条目都能从应用入口触发。审计结果会随公告更新，不能作为永久安全状态。
 
-运行时安装链为 @cloudbase/node-sdk 3.18.3 及其依赖：axios 0.27.2、@cloudbase/database 1.4.3 的 lodash.set / lodash.unset，以及 signature-nodejs → npm url → qs 6.15.3。开发工具条目还涉及 Vitest 与构建工具树。
+本轮更新 [Vitest 4.1.11](https://registry.npmjs.org/vitest/4.1.11) 及七个同版配套包、[nanoid 3.3.18](https://registry.npmjs.org/nanoid/3.3.18)、[source-map-js 1.2.2](https://registry.npmjs.org/source-map-js/1.2.2)，下载地址与 integrity 核对官方元数据。只改十个 dev 包及根版本要求，保留其余锁定节点；独立 npm ci 已退出 0。没有连带升级 Vite、构建器或运行时 SDK。
+
+运行时安装链仍为 @cloudbase/node-sdk 3.18.3 及其依赖：axios 0.27.2、@cloudbase/database 1.4.3 的 lodash.set / lodash.unset，以及 signature-nodejs → npm url → qs 6.15.3。
 
 安装源码复查：lodash.set / unset 的相关调用点位于实时 watch 差量处理，应用没有使用 watch；签名模块的 require("url") 在本机 Node 24 实测解析为内置模块，未经过 npm url / qs。Axios 条件性用于固定地址的 SDK 环境探测，应用没有使用 SDK requestClient 或扩展，也未发现把外部请求者的 URL 交给 Axios。常规数据库传输使用原生 http/https，问理上游使用 fetch。
 
-这不是全依赖动态覆盖或线上利用验收，不能据此宣布风险消失。仍需核对供应商修复、运行环境与版本兼容，再重新独立安装及回归；本轮没有改依赖。
+这不是全依赖动态覆盖或线上利用验收，不能据此宣布风险消失。仍需核对运行时供应商修复、运行环境与版本兼容；运行时依赖本轮未改，不能用开发工具补丁代替处理。
 
 npm 给出的部分 CloudBase fixAvailable 建议为 3.0.0，属于主版本变更且低于当前安装版本，不能直接执行 npm audit fix --force。依赖处理完成前，不把此候选标为适合生产的首发版本。

@@ -52,13 +52,15 @@ flowchart TD
 
 ## 已修正的可靠性问题
 
-2026-10-09 在本地源码候选完成以下修正。测试均使用合成数据，没有连接生产环境。
+2026-10-09 至 10 日在本地源码候选完成以下修正。测试均使用合成数据，没有连接生产环境。
 
 | 问题 | 修正 | 验证及边界 |
 |---|---|---|
 | 普通升级清本地缓存 | 删除应用版本清缓存机制，[initialSync](../android/app/src/main/java/com/privatechat/couplechat/core/data/ChatRepository.kt) 保留并合并历史 | [仓库回归](../android/app/src/test/java/com/privatechat/couplechat/core/data/ChatRepositoryTest.kt)；迁移测试已编译，实际设备迁移尚未运行 |
 | 每次请求尝试建集合并吞错误 | [function-entry.ts](../backend/src/function-entry.ts) 只路由请求，集合由部署者事先创建 | [入口回归](../backend/test/function-entry.test.ts) 覆盖重复 health/聊天调用与错误传播；新环境必须按部署说明预建集合 |
 | 登录失败计数并发丢失、过期锁重置竞态 | [CloudBase 事务](../backend/src/adapters/cloudbase-persistence.ts) 原子读取最新记录、过期重置与累加；活跃锁不续期，冲突有界重试 | [并发回归](../backend/test/login-attempt-concurrency.test.ts) 与 [安装 SDK 的假传输测试](../backend/test/cloudbase-persistence.test.ts)；尚未在真实 CloudBase 并发验收 |
+| 旧会话分页响应或排队请求污染新会话 | [分页仓库](../android/app/src/main/java/com/privatechat/couplechat/core/data/ChatRepository.kt) 捕获发起会话，等待锁及读取后核验；认证失败不代表历史已取完 | [受控延迟回归](../android/app/src/test/java/com/privatechat/couplechat/core/data/ChatRepositoryTest.kt) 覆盖迟到失效、可见窗口、排队凭据与当前登录失效；没有真实手机切换验收 |
+| 登录限流优先使用事件转发头，并漏读 SDK 上下文格式 | [函数适配](../backend/src/function-handler.ts) 仅从当前平台 context 解析有效地址，支持 JSON、对象及旧 environ；不读事件来源字段或全局环境 | [来源回归](../backend/test/function-handler.test.ts) 覆盖格式、优先级、IPv6、不可信输入及错误传播；实际网关封装尚未验收 |
 
 没有账单或阶段计时，不推算删除集合初始化带来的费用与延迟节省。成功登录清零与并发失败按存储操作顺序生效，没有重写整套认证策略。
 
@@ -68,9 +70,8 @@ flowchart TD
 |---|---|---|
 | 新环境部署步骤未完整验收 | [部署说明](SETUP.md) 列出准确集合名与管理员权限；完整索引和从零部署尚未实跑 | 全新环境初始化后通过隔离双端流程，管理员权限不能传给客户端 |
 | 默认升级清单引用未随仓库交付的产物 | [release-manifest.ts](../backend/src/release-manifest.ts) 与 [release-service.ts](../backend/src/services/release-service.ts) | 未启用升级应有明确状态；不能因不存在的对象破坏基础体验 |
-| 旧会话分页失败可能修改新会话状态 | [fetchOlderPage](../android/app/src/main/java/com/privatechat/couplechat/core/data/ChatRepository.kt) 的会话失效分支 | 用受控延迟验证旧请求失败不把新会话标记为历史已取完 |
 
-登录 source 的代理头信任边界需要独立网关核实，尚未证明线上可被伪造。Room 的历史 schema 与迁移仍需要隔离设备验证。
+登录 source 按 TCB_SOURCE_IP、WX_CLIENTIP、WX_CLIENTIPV6 的顺序选择有效地址；缺少可信地址时，同账号共用 unknown 桶。来源变化会改变旧冷却记录的键，实际网关封装和部署兼容仍需独立环境核实，尚未证明线上可被伪造。Room 的历史 schema 与迁移仍需要隔离设备验证。
 
 依赖风险另见 [安全文档](SECURITY.md)。这是聚焦审查，不是全面安全认证。
 

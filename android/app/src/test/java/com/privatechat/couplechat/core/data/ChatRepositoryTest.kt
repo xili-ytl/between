@@ -698,6 +698,105 @@ class ChatRepositoryTest {
     }
 
     @Test
+    fun oldHistoryInvalidSessionCannotExhaustReplacementHistory() = runTest {
+        val cached = entity("1002_cached", "cached", "1002", "2026-08-06T00:01:00Z")
+        val older = message("1001_older", "older", "1001", "2026-08-06T00:00:00Z")
+        val cache = FakeLocalStore(listOf(cached))
+        val sessions = chatSessions()
+        val api = FakeApi(beforePages = ArrayDeque(listOf(page(older))))
+        val gate = api.gateBefore()
+        val repository = ChatRepository(api, cache, sessions)
+        val oldRequest = async { repository.loadOlder() }
+        gate.started.await()
+
+        sessions.set(replacementSession)
+        gate.fail(SessionInvalidException())
+        oldRequest.await()
+        val currentResult = repository.loadOlder()
+
+        assertEquals(replacementSession, sessions.current())
+        assertEquals(2, api.beforeCursors.size)
+        assertEquals(listOf(session.token, replacementSession.token), api.beforeTokens)
+        assertTrue(cache.all().any { it.id == older.id })
+        assertEquals(1, currentResult.revealed)
+        assertTrue(currentResult.hasMore)
+    }
+
+    @Test
+    fun oldHistorySuccessCannotExpandTheReplacementVisibleWindow() = runTest {
+        val cached = (1..75).map { index ->
+            entity("1002_cached$index", "cached$index", "1002",
+                java.time.Instant.parse("2026-08-06T00:00:00Z").plusSeconds(index.toLong()).toString())
+        }
+        val cache = FakeLocalStore(cached.take(50))
+        val sessions = chatSessions()
+        val api = FakeApi()
+        val gate = api.gateBefore()
+        val repository = ChatRepository(api, cache, sessions)
+        val oldRequest = async { repository.loadOlder() }
+        gate.started.await()
+
+        sessions.set(replacementSession)
+        cache.insertAll(cached.drop(50))
+        gate.succeed(page(message("1001_stale", "stale", "1001", "2026-08-05T00:00:00Z")))
+        val staleResult = oldRequest.await()
+
+        assertEquals(0, staleResult.revealed)
+        assertEquals(50, repository.messages.first().size)
+        assertFalse(cache.all().any { it.id == "1001_stale" })
+        assertEquals(replacementSession, sessions.current())
+    }
+
+    @Test
+    fun queuedOldHistoryRequestCannotFetchUsingReplacementCredentials() = runTest {
+        val cached = entity("1002_cached", "cached", "1002", "2026-08-06T00:01:00Z")
+        val older = message("1001_older", "older", "1001", "2026-08-06T00:00:00Z")
+        val cache = FakeLocalStore(listOf(cached))
+        val sessions = chatSessions()
+        val api = FakeApi(beforePages = ArrayDeque(listOf(page(older))))
+        val gate = api.gateBefore()
+        val repository = ChatRepository(api, cache, sessions)
+        val first = async { repository.loadOlder() }
+        gate.started.await()
+        val queued = async { repository.loadOlder() }
+        runCurrent()
+
+        sessions.set(replacementSession)
+        gate.fail(SessionInvalidException())
+        first.await()
+        val queuedResult = queued.await()
+
+        assertEquals(1, api.beforeCursors.size)
+        assertEquals(listOf(session.token), api.beforeTokens)
+        assertEquals(listOf(cached), cache.all())
+        assertEquals(0, queuedResult.revealed)
+        assertEquals(replacementSession, sessions.current())
+
+        repository.loadOlder()
+        assertEquals(2, api.beforeCursors.size)
+        assertEquals(listOf(session.token, replacementSession.token), api.beforeTokens)
+        assertTrue(cache.all().any { it.id == older.id })
+    }
+
+    @Test
+    fun currentHistoryInvalidSessionClearsLoginAndKeepsCachedMessages() = runTest {
+        val cached = entity("1002_cached", "cached", "1002", "2026-08-06T00:01:00Z")
+        val cache = FakeLocalStore(listOf(cached))
+        val sessions = chatSessions()
+        val api = FakeApi()
+        val gate = api.gateBefore()
+        val repository = ChatRepository(api, cache, sessions)
+        val request = async { repository.loadOlder() }
+        gate.started.await()
+
+        gate.fail(SessionInvalidException())
+        request.await()
+
+        assertNull(sessions.current())
+        assertEquals(listOf(cached), cache.all())
+    }
+
+    @Test
     fun oldSyncInvalidSessionCannotClearReplacementLogin() = runTest {
         val sessions = chatSessions()
         val api = FakeApi()
@@ -898,6 +997,7 @@ private class FakeApi(
     var imageUrlCalls = 0
     var lastAfterCursor: MessageCursor? = null
     val beforeCursors = mutableListOf<MessageCursor?>()
+    val beforeTokens = mutableListOf<String>()
     val sentIds = mutableListOf<String>()
     val sentBodies = mutableListOf<String>()
     var lastReplyToMessageId: String? = null
@@ -924,6 +1024,7 @@ private class FakeApi(
 
     override suspend fun before(token: String, cursor: MessageCursor?): MessagePage {
         beforeCursors += cursor
+        beforeTokens += token
         beforeGate?.also { beforeGate = null }?.let { return it.await() }
         if (beforeFailures-- > 0) error("offline")
         serverMessages?.let { rows ->
