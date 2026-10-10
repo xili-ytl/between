@@ -46,7 +46,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: gradle/actions/setup-gradle@v6
       - name: Install matching Android SDK components
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
       - run: bash ./gradlew testDebugUnitTest lintDebug assembleDebug --no-daemon --console=plain

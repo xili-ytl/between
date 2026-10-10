@@ -1,5 +1,7 @@
 # Third-party notices
 
+The project's [MIT License](LICENSE) covers original project code, documentation, and synthetic examples. It does not relicense the third-party resources or dependencies described below. Their own notices, license texts, exceptions, and applicable service terms continue to apply. This repository is a source preview; distribution of an APK or function package requires checking the artifacts actually included in that distribution.
+
 ## Phosphor Icons
 
 - Package: `@phosphor-icons/core`
@@ -39,6 +41,15 @@ Only the two SVG path definitions above are derived from WeUI source. No WeChat 
 
 The application uses AppUpdater only as the APK download engine. Automatic installation is disabled; the app verifies the downloaded APK before opening Android's system installer.
 
+## JPush (optional push delivery)
+
+- Android artifact: `cn.jiguang.sdk:jpush:6.2.0`.
+- The resolved artifact POM declares Apache License 2.0. The project's own license does not replace the SDK's license or the [Jiguang developer and service agreements](https://www.jiguang.cn/license).
+- The SDK transitively depends on JCore. Its published dependency uses a version range, so a fresh build may resolve a different JCore version from an existing local cache; no reproducible JCore lock is claimed.
+- Push delivery is optional and requires a deployment owner's Jiguang configuration. Credentials, registration data, and production configuration are not included in this repository.
+
+Before distributing an application binary, review the exact resolved SDK artifacts, included notices, and the service's privacy requirements. This source preview does not redistribute a signed APK.
+
 ## Dots Two Horizontal
 
 - Source: SVG Repo, `https://www.svgrepo.com/svg/353086/dots-two-horizontal`
@@ -65,8 +76,8 @@ Markwon is used through native Android `TextView` spans/drawables. The chat rend
 ### Markwon LaTeX renderer and fonts
 
 - `ru.noties:jlatexmath-android:0.2.0` — 650,835 bytes (`jlatexmath-android-0.2.0.aar`), source `https://github.com/noties/jlatexmath-android`.
-- License: GPLv2 with the upstream JLatexMath Classpath Exception. The shipped artifact POM declares GPLv2; the underlying upstream license also grants the independent-module linking exception. The authoritative upstream text is `https://github.com/opencollab/jlatexmath/blob/master/LICENSE`.
-- The AAR bundles JLatexMath font resources. Their notices are included inside the artifact under `org/scilab/forge/jlatexmath/fonts/licences/`, covering the OFL, Knuth, free-license, public-domain, and GPLv2 font terms.
+- License: GPLv2 with the JLatexMath independent-module linking exception. The artifact POM declares GPLv2; the Android fork preserves the exception in its [LICENSE](https://github.com/noties/jlatexmath-android/blob/android/LICENSE). The dependency remains under its own license rather than the application's license.
+- The resolved 0.2.0 AAR contains font notices under `assets/org/scilab/forge/jlatexmath/fonts/licences/`: `Knuth_License.txt`, `License_for_dsrom.txt`, and `OFL.txt`. This describes the inspected artifact, not every optional font module in upstream JLatexMath.
 
 ### Transitive CommonMark parser
 
