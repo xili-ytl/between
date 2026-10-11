@@ -6,9 +6,9 @@
 
 *Beyond the World, Between You and Me.*
 
-Between 最初是一个仿微信的二人情侣空间，有聊天、朋友圈和云端存储。
+Between 是一个仿微信的二人情侣空间，有聊天、朋友圈和云端存储。
 
-后来，我们想一起养一只企鹅，于是加上了小时候玩过的 Q 宠，再接入 AI Agent，让它可以和我们聊天。公开版的企鹅叫 **小Q**。
+在此基础上接入 2018 年已下架的 QQ宠物（Q宠），并通过 AI Agent 加入对话与记忆能力，让两个人可以一起养一只会聊天的企鹅。企鹅叫 **小Q**。
 
 ## 功能
 
@@ -29,11 +29,18 @@ Between 最初是一个仿微信的二人情侣空间，有聊天、朋友圈和
 
 部署步骤和可选 AI 配置见 [配置与部署](docs/SETUP.md)，小Q的设定可以自行修改。
 
-## 技术
+## 技术栈
 
-- Android：Kotlin、Jetpack Compose、Room。
-- 后端：TypeScript、腾讯 CloudBase。
-- AI：上下文、图片理解、按需搜索和记忆。
+| 模块 | 技术 | 用途 |
+|---|---|---|
+| Android | Kotlin、Jetpack Compose、Material 3、ViewModel | 界面、导航与页面状态 |
+| 网络与数据 | Ktor / OkHttp、Coroutines / Flow、Room / SQLite、Coil 3 | 云端同步、消息缓存与图片加载 |
+| 消息渲染 | Markwon、JLatexMath | Markdown、代码块与 LaTeX 公式 |
+| 后端 | TypeScript、Node.js、腾讯 CloudBase | 云函数、文档数据库与云存储 |
+| 聊天 Agent | OpenRouter、MiMo 2.6 Flash | 多模态上下文、按需搜索与记忆 |
+| 测试与构建 | Vitest、JUnit 4、Gradle、esbuild、GitHub Actions | 自动回归、类型检查与双端构建 |
+
+Agent 使用持久化任务、租约与事务处理回复；记忆支持来源校验、纠正和撤回。数据流与实现见 [架构文档](docs/ARCHITECTURE.md)。
 
 [架构](docs/ARCHITECTURE.md) · [数据与安全](docs/SECURITY.md) · [第三方说明](THIRD_PARTY_NOTICES.md)
 
