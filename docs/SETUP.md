@@ -2,9 +2,35 @@
 
 ## 准备
 
-安装 Node.js 24 LTS、JDK 17、Android SDK Platform 35 和 Build Tools 35.0.0。先运行 README 的合成检查，不需要云登录。
+安装 Node.js 24 LTS、JDK 17、Android SDK Platform 35 和 Build Tools 35.0.0。
 
 backend/.env.example 是字段说明，脚本不会自动加载它。通过 shell 或云控制台提供实际变量。Android 将 local.properties.example 复制为被忽略的 local.properties，填写 SDK 路径、自己的函数 URL 和客户端 Publishable Key。没有云配置时可以构建，不能登录。
+
+## 本地检查
+
+下面的检查使用合成数据，不需要云账号或模型 API key。
+
+~~~sh
+cd backend
+npm ci
+npm test
+npm run typecheck
+npm run persona:check
+npm run build:function
+cd ..
+node --test android/scripts/wenli-unread.test.mjs
+cd android
+# Windows 用 gradlew.bat
+bash ./gradlew testDebugUnitTest lintDebug assembleDebug
+~~~
+
+只检查 Agent 接线时，可在 backend 执行以下聚焦测试：
+
+~~~sh
+npm test -- test/deepseek-vision-reply-generator.test.ts test/wenli-agent-memory-flow.test.ts test/wenli-app-factory-flow.test.ts test/wenli-job-worker.test.ts test/wenli-service-race.test.ts
+~~~
+
+Gradle Wrapper 固定 8.9；云函数运行 Node 20.19，本地 SQLite 检查使用 Node 24。npm run eval:wenli 会调用真实模型并产生费用，不属于上述本地检查。
 
 ## 自有 CloudBase
 
@@ -41,7 +67,9 @@ OPENROUTER_API_KEY=<server-only>
 
 OpenRouter 模型常量在 adapters/openrouter-wenli-client.ts，当前为 MiMo 2.6 Flash，固定上游；该路径不读取 WENLI_MODEL_NAME 切模型。更换时应另做合成评测并核对供应商支持。不需要本机代理或常驻 runner。
 
-未设置开关/密钥时，真人聊天可用，小Q执行不可用。公开版本的示例人格不代表真人经历；编辑后按 README 编译。API 会产生独立费用。
+未设置开关/密钥时，真人聊天可用，小Q执行不可用。API 会产生独立费用。
+
+小Q的设定源为 backend/resources/wenli/owner.md，仓库内使用合成示例。修改后在 backend 执行 npm run persona:compile，再执行 npm run persona:check。另选文件可使用 npm run persona:compile -- --source /path/to/owner.md；角色编译只读取明确指定的文件。
 
 ## 推送、升级、备份
 
